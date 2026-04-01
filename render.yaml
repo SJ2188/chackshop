@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: shopthai
+    name: chackshop
     env: node
     region: singapore
     plan: free
@@ -12,3 +12,11 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: MONGO_URI
+        sync: false
+      - key: LINE_NOTIFY_TOKEN
+        sync: false
+      - key: LINE_PAY_CHANNEL_ID
+        sync: false
+      - key: LINE_PAY_CHANNEL_SECRET
+        sync: false
