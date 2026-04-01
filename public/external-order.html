@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>สั่งซื้อออนไลน์ - Sukjai by Chackshop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --primary: #FF6B00; --primary-dark: #E55C00; --secondary: #1A1A2E;
+      --accent: #FFBA08; --bg: #F5F5F7; --white: #FFFFFF;
+      --gray-100: #F8F9FA; --gray-200: #E9ECEF; --gray-300: #DEE2E6;
+      --gray-400: #CED4DA; --gray-500: #ADB5BD; --gray-600: #6C757D;
+      --gray-700: #495057; --gray-800: #343A40; --text: #1A1A2E;
+      --text-light: #6C757D; --success: #00C853; --danger: #FF3D00;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08); --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 20px; --radius-full: 9999px;
+    }
+    body { font-family: 'Prompt', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; }
+
+    .header { background: var(--primary); color: white; padding: 14px 20px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-md); }
+    .header-brand { font-size: 20px; font-weight: 700; }
+    .header-brand span { color: var(--accent); }
+
+    .container { max-width: 500px; margin: 0 auto; padding: 16px; }
+
+    .shop-banner { background: white; border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 12px; }
+    .shop-banner-icon { font-size: 40px; }
+    .shop-banner-text h3 { font-size: 16px; font-weight: 700; }
+    .shop-banner-text p { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
+
+    .section-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--gray-700); display: flex; align-items: center; gap: 6px; }
+
+    .customer-card, .order-card, .payment-card, .address-card, .error-card { background: white; border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; }
+    .form-input { width: 100%; border: 1.5px solid var(--gray-300); border-radius: var(--radius-md); padding: 11px 14px; font-size: 15px; font-family: inherit; outline: none; background: white; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--primary); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-textarea { width: 100%; border: 1.5px solid var(--gray-300); border-radius: var(--radius-md); padding: 11px 14px; font-size: 15px; font-family: inherit; outline: none; background: white; resize: none; min-height: 80px; transition: border-color 0.2s; }
+    .form-textarea:focus { border-color: var(--primary); }
+
+    .order-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
+    .order-item:last-child { border-bottom: none; }
+    .order-item-emoji { font-size: 28px; width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .order-item-info { flex: 1; }
+    .order-item-name { font-size: 14px; font-weight: 600; line-height: 1.3; }
+    .order-item-qty { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+    .order-item-price { font-size: 14px; font-weight: 700; color: var(--primary); }
+    .order-footer { padding-top: 12px; border-top: 2px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+    .order-total { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+    .payment-option { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-md); margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+    .payment-option.selected { border-color: var(--primary); background: #FFF3E0; }
+    .payment-option-title { font-weight: 600; font-size: 14px; }
+    .payment-option-desc { font-size: 12px; color: var(--gray-500); }
+    .fee-badge { display: inline-block; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
+    .delivery-option { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-md); margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+    .delivery-option.selected { border-color: var(--primary); background: #FFF3E0; }
+    .delivery-option .material-icons-round { font-size: 24px; color: var(--primary); }
+    .bank-info { background: #E3F2FD; border-radius: var(--radius-md); padding: 14px; margin: 12px 0; border: 1.5px solid #BBDEFB; }
+    .bank-info-title { font-weight: 700; font-size: 14px; color: var(--primary); margin-bottom: 8px; }
+    .bank-info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+    .bank-info-label { color: var(--gray-600); }
+    .bank-info-value { font-weight: 600; color: var(--text); }
+    .qr-section { text-align: center; padding: 16px; background: #F5F5F5; border-radius: var(--radius-md); margin: 12px 0; }
+    .qr-section img { max-width: 200px; border-radius: var(--radius-md); }
+
+    .cta-btn { width: 100%; background: var(--primary); color: white; border: none; border-radius: var(--radius-xl); padding: 16px; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+    .cta-btn:active { background: var(--primary-dark); transform: scale(0.98); }
+    .cta-btn:disabled { background: var(--gray-400); cursor: not-allowed; }
+
+    .top-tabs { display: flex; background: white; border-radius: var(--radius-lg); margin-bottom: 16px; box-shadow: var(--shadow-sm); overflow: hidden; }
+    .top-tab { flex: 1; text-align: center; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; background: white; font-family: inherit; color: var(--gray-500); border-bottom: 3px solid transparent; }
+    .top-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: #FFF3E0; }
+    .top-tab:not(.active):hover { background: var(--gray-100); }
+
+    .success-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; }
+    .success-modal { background: white; border-radius: var(--radius-xl); padding: 32px 24px; text-align: center; max-width: 360px; width: 90%; }
+    .success-icon { width: 72px; height: 72px; background: #E8F5E9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .success-icon .material-icons-round { font-size: 40px; color: var(--success); }
+    .success-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .success-order { font-size: 16px; color: var(--gray-600); margin-bottom: 8px; }
+    .success-order strong { color: var(--primary); }
+    .success-desc { font-size: 14px; color: var(--gray-500); margin-bottom: 20px; }
+    .success-btn { background: var(--primary); color: white; border: none; border-radius: var(--radius-xl); padding: 14px 32px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .error-card { padding: 40px 24px; text-align: center; }
+    .error-card .material-icons-round { font-size: 64px; color: var(--gray-300); }
+    .error-card p { margin-top: 12px; color: var(--gray-500); }
+
+    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: white; padding: 12px 24px; border-radius: var(--radius-full); font-size: 14px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 300; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="header" style="display:flex;align-items:center;gap:12px;padding:10px 20px;">
+    <img src="/images/shop-logo.png" alt="Sukjai" style="height:44px;border-radius:8px;" onerror="this.style.display='none';">
+    <div style="font-size:18px;font-weight:700;">Sukjai by <span style="color:var(--accent);">Chackshop</span></div>
+  </div>
+  <div class="container" id="app"></div>
+
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-modal">
+      <div class="success-icon"><span class="material-icons-round">check</span></div>
+      <div class="success-title">สั่งซื้อสำเร็จ!</div>
+      <div class="success-order">Order #<strong id="successOrderId">-</strong></div>
+      <div class="success-desc">ขอบคุณที่สั่งซื้อ รอรับสินค้าได้เลย</div>
+      <button class="success-btn" onclick="window.close()">ปิด</button>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = window.location.protocol + '//' + window.location.hostname + ':3002/api';
+    let cartItems = [];
+    let selectedPayment = 'cod';
+    let selectedDelivery = 'pickup';
+    let paymentSettings = {};
+    let subtotal = 0;
+
+    function parseToken() {
+      const match = window.location.pathname.match(/\/order\/([^\/]+)/);
+      if (match) { try { return JSON.parse(atob(match[1])); } catch { return null; } }
+      return null;
+    }
+
+    async function init() {
+      const app = document.getElementById('app');
+      const tokenData = parseToken();
+      if (!tokenData) {
+        app.innerHTML = '<div class="error-card"><span class="material-icons-round">link_off</span><p>Link ไม่ถูกต้องหรือหมดอายุแล้ว</p></div>';
+        return;
+      }
+      try {
+        const [productsRes, settingsRes] = await Promise.all([fetch(API + '/products'), fetch(API + '/settings')]);
+        const allProducts = await productsRes.json();
+        paymentSettings = await settingsRes.json();
+        cartItems = tokenData.items.map(ci => { const p = allProducts.find(ap => ap.id === ci.productId); return p ? { ...p, qty: ci.qty } : null; }).filter(Boolean);
+        if (cartItems.length === 0) {
+          app.innerHTML = '<div class="error-card"><span class="material-icons-round">shopping_cart</span><p>ไม่พบสินค้าในรายการ</p></div>';
+          return;
+        }
+        renderApp(tokenData, paymentSettings);
+        recalcTotal();
+      } catch {
+        app.innerHTML = '<div class="error-card"><span class="material-icons-round">wifi_off</span><p>ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</p></div>';
+      }
+    }
+
+    function recalcTotal() {
+      subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+      let feePercent = 0;
+      if (selectedPayment === 'cod') feePercent = paymentSettings.codFeePercent || 10;
+      else if (selectedPayment === 'transfer') feePercent = paymentSettings.transferFeePercent || 3;
+      else if (selectedPayment === 'qrcode') feePercent = paymentSettings.qrFeePercent || 3;
+      const feeAmount = Math.round(subtotal * feePercent / 100);
+      const total = subtotal + feeAmount;
+      if (feeAmount > 0) {
+        document.getElementById('extFeeRow').style.display = 'flex';
+        document.getElementById('extFeePercent').textContent = `(${feePercent}%)`;
+        document.getElementById('extFeeAmount').textContent = `+฿${feeAmount.toLocaleString()}`;
+      } else {
+        document.getElementById('extFeeRow').style.display = 'none';
+      }
+      document.getElementById('extTotal').textContent = `฿${total.toLocaleString()}`;
+      return { total, feeAmount, feePercent };
+    }
+
+    function selectDelivery(el, method) {
+      document.querySelectorAll('.delivery-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedDelivery = method;
+      const addrCard = document.getElementById('extAddressCard');
+      addrCard.style.display = method === 'delivery' ? 'block' : 'none';
+    }
+
+    function selectPayment(el, method) {
+      document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedPayment = method;
+      recalcTotal();
+      document.getElementById('extBankInfo').style.display = method === 'transfer' ? 'block' : 'none';
+      document.getElementById('extQrSection').style.display = method === 'qrcode' ? 'block' : 'none';
+    }
+
+    function renderApp(tokenData, settings) {
+      const app = document.getElementById('app');
+      const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const escaped = s => String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const n = escaped(tokenData.name || '');
+      const p = escaped(tokenData.phone || '');
+      const e = escaped(tokenData.email || '');
+      const codFee = settings.codFeePercent || 10;
+      const transferFee = settings.transferFeePercent || 3;
+      const qrFee = settings.qrFeePercent || 3;
+      app.innerHTML = `
+        <!-- Logo Banner -->
+        <div style="background:white;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);text-align:center;">
+          <img src="/images/shop-logo.png" alt="Sukjai by Chackshop" style="max-width:280px;max-height:80px;object-fit:contain;" onerror="this.parentElement.innerHTML='<div style=\\'font-size:22px;font-weight:700;color:#FF6B00;\\'>🍜 Sukjai by Chackshop</div>'">
+        </div>
+
+        <!-- Tabs -->
+        <div class="top-tabs">
+          <button class="top-tab active" id="tabOrder" onclick="switchExtTab('order')">📦 สั่งซื้อ</button>
+          <button class="top-tab" id="tabContact" onclick="switchExtTab('contact')">📞 ติดต่อเรา</button>
+        </div>
+
+        <!-- Order Tab Content -->
+        <div id="contentOrder">
+        <div class="shop-banner" style="background:#FFF8E1;border:1.5px solid #FFE082;">
+          <div class="shop-banner-icon">🏪</div>
+          <div class="shop-banner-text"><h3 style="color:#E65100;">สุขใจบายแช็คช้อป</h3><p style="font-size:13px;">ติดต่อสอบถาม: <a href="mailto:admin@shopthai.com" style="color:#FF6B00;font-weight:600;">admin@shopthai.com</a></p></div>
+        </div>
+        <div class="customer-card">
+          <div class="section-title"><span class="material-icons-round" style="font-size:18px;color:var(--primary)">person</span> ข้อมูลลูกค้า</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">ชื่อ *</label><input type="text" class="form-input" id="custName" placeholder="ชื่อ-นามสกุล" value="${n}"></div>
+            <div class="form-group"><label class="form-label">โทรศัพท์</label><input type="tel" class="form-input" id="custPhone" placeholder="081-234-5678" value="${p}"></div>
+          </div>
+          <div class="form-group"><label class="form-label">อีเมล *</label><input type="email" class="form-input" id="custEmail" placeholder="ton@email.com" value="${e}"></div>
+        </div>
+        <div class="section-title"><span class="material-icons-round" style="font-size:18px;color:var(--primary)">shopping_bag</span> รายการสั่งซื้อ (${cartItems.length} รายการ)</div>
+        <div class="order-card">
+          ${cartItems.map(item => `
+            <div class="order-item">
+              <div class="order-item-emoji" style="background:#FFF3E0">${item.emoji || '📦'}</div>
+              <div class="order-item-info"><div class="order-item-name">${item.name}</div><div class="order-item-qty">x${item.qty}</div></div>
+              <div class="order-item-price">฿${(item.price * item.qty).toLocaleString()}</div>
+            </div>`).join('')}
+        </div>
+        <div class="order-footer" style="flex-direction:column;gap:6px;align-items:flex-start;">
+          <div style="display:flex;justify-content:space-between;width:100%;"><span style="font-size:13px;color:var(--gray-600);">ราคาสินค้า</span><span style="font-size:14px;font-weight:600;">฿${subtotal.toLocaleString()}</span></div>
+          <div style="display:flex;justify-content:space-between;width:100%;" id="extFeeRow"><span style="font-size:13px;color:var(--danger);">ค่าธรรมเนียม <span id="extFeePercent"></span></span><span style="font-size:14px;font-weight:600;color:var(--danger);" id="extFeeAmount"></span></div>
+          <div style="display:flex;justify-content:space-between;width:100%;padding-top:8px;border-top:1.5px dashed var(--gray-300);"><span style="font-size:15px;font-weight:700;">รวมทั้งสิ้น</span><span class="order-total" id="extTotal">฿${subtotal.toLocaleString()}</span></div>
+        </div>
+
+        <!-- Delivery Option -->
+        <div class="payment-card" style="margin-top:16px;">
+          <div class="section-title"><span class="material-icons-round" style="font-size:18px;color:var(--primary)">local_shipping</span> รูปแบบการรับสินค้า</div>
+          <div class="delivery-option selected" onclick="selectDelivery(this,'pickup')" data-delivery="pickup">
+            <span class="material-icons-round">store</span>
+            <div><div style="font-weight:600;font-size:14px;">รับเองที่ร้าน</div><div style="font-size:12px;color:var(--gray-500);">ไม่มีค่าจัดส่ง</div></div>
+          </div>
+          <div class="delivery-option" onclick="selectDelivery(this,'delivery')" data-delivery="delivery">
+            <span class="material-icons-round">local_shipping</span>
+            <div><div style="font-weight:600;font-size:14px;">จัดส่งตามที่อยู่</div><div style="font-size:12px;color:var(--gray-500);">บริการจัดส่งถึงที่</div></div>
+          </div>
+        </div>
+
+        <!-- Address Card (hidden by default) -->
+        <div class="address-card" id="extAddressCard" style="display:none;">
+          <div class="section-title"><span class="material-icons-round" style="font-size:18px;color:var(--primary)">location_on</span> ที่อยู่จัดส่ง</div>
+          <textarea class="form-textarea" id="deliveryAddress" placeholder="บ้านเลขที่ ซอย ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+        </div>
+
+        <div class="payment-card" style="margin-top:16px;">
+          <div class="section-title"><span class="material-icons-round" style="font-size:18px;color:var(--primary)">payments</span> วิธีชำระเงิน</div>
+          <div class="payment-option selected" onclick="selectPayment(this,'cod')" data-method="cod"><span class="material-icons-round" style="color:var(--primary)">payments</span><div><div class="payment-option-title">เก็บเงินปลายทาง (COD)<span class="fee-badge">+${codFee}%</span></div><div class="payment-option-desc">จ่ายเมื่อได้รับสินค้า</div></div></div>
+          <div class="payment-option" onclick="selectPayment(this,'transfer')" data-method="transfer"><span class="material-icons-round" style="color:var(--gray-600)">account_balance</span><div><div class="payment-option-title">โอนผ่านธนาคาร<span class="fee-badge">+${transferFee}%</span></div><div class="payment-option-desc">โอนเงินเข้าบัญชีธนาคาร</div></div></div>
+          <div class="payment-option" onclick="selectPayment(this,'qrcode')" data-method="qrcode"><span class="material-icons-round" style="color:var(--gray-600)">qr_code_2</span><div><div class="payment-option-title">QR Code<span class="fee-badge">+${qrFee}%</span></div><div class="payment-option-desc">สแกน QR ผ่านแอปธนาคาร</div></div></div>
+
+          <!-- Bank Info -->
+          <div class="bank-info" id="extBankInfo" style="display:none;">
+            <div class="bank-info-title">🏦 ข้อมูลบัญชีโอนเงิน</div>
+            <div class="bank-info-row"><span class="bank-info-label">ธนาคาร</span><span class="bank-info-value">${settings.bankName || 'ธนาคารกรุงไทย'}</span></div>
+            <div class="bank-info-row"><span class="bank-info-label">เลขที่บัญชี</span><span class="bank-info-value">${settings.bankAccount || '854-3-10966-3'}</span></div>
+            <div class="bank-info-row"><span class="bank-info-label">ชื่อบัญชี</span><span class="bank-info-value">${settings.bankAccountName || 'บริษัท สุขใจไอที จำกัด'}</span></div>
+          </div>
+
+          <!-- QR Section -->
+          <div class="qr-section" id="extQrSection" style="display:none;">
+            <img src="${settings.qrCodeUrl || '/qr-payment.png'}" alt="QR Code" onerror="this.style.display='none';" style="max-width:200px;border-radius:12px;">
+            <div style="font-size:12px;color:var(--gray-500);margin-top:8px;">สแกน QR Code เพื่อชำระเงิน</div>
+          </div>
+        </div><!-- end contentOrder -->
+        <button class="cta-btn" id="submitBtn" onclick="submitOrder()"><span class="material-icons-round">check_circle</span> ยืนยันสั่งซื้อ</button>
+        </div><!-- end app content -->
+
+        <!-- Contact Tab Content (hidden by default) -->
+        <div id="contentContact" style="display:none;">
+          <div style="background:white;border-radius:var(--radius-lg);padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.08);text-align:center;margin-bottom:16px;">
+            <img src="/images/shop-logo.png" alt="Sukjai" style="max-width:200px;max-height:60px;object-fit:contain;margin-bottom:16px;" onerror="this.style.display='none';">
+            <div style="font-size:22px;font-weight:700;color:#1A1A2E;margin-bottom:4px;">สุขใจบายแช็คช้อป</div>
+            <div style="font-size:14px;color:#6C757D;margin-bottom:20px;">ยินดีต้อนรับสู่ร้านของเรา</div>
+
+            <div style="background:#FFF3E0;border-radius:var(--radius-md);padding:20px;margin-bottom:16px;text-align:left;">
+              <div style="font-size:16px;font-weight:700;color:#E65100;margin-bottom:12px;">📞 ติดต่อเรา</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <span style="font-size:20px;">📱</span>
+                <div>
+                  <div style="font-size:12px;color:#6C757D;">โทรศัพท์</div>
+                  <a href="tel:0918533947" style="font-size:15px;font-weight:600;color:#FF6B00;text-decoration:none;">091-853-3947</a>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <span style="font-size:20px;">📧</span>
+                <div>
+                  <div style="font-size:12px;color:#6C757D;">อีเมล</div>
+                  <a href="mailto:admin@shopthai.com" style="font-size:15px;font-weight:600;color:#FF6B00;text-decoration:none;">admin@shopthai.com</a>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <span style="font-size:20px;">🏪</span>
+                <div>
+                  <div style="font-size:12px;color:#6C757D;">รับสินค้า</div>
+                  <div style="font-size:15px;font-weight:600;color:#1A1A2E;">รับเองที่ร้าน Sukjai by Chackshop</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:20px;">⏰</span>
+                <div>
+                  <div style="font-size:12px;color:#6C757D;">เวลาให้บริการ</div>
+                  <div style="font-size:15px;font-weight:600;color:#1A1A2E;">ทุกวัน 08:00 - 20:00 น.</div>
+                </div>
+              </div>
+            </div>
+
+            <button class="cta-btn" onclick="switchExtTab('order')" style="background:#1A1A2E;"><span class="material-icons-round">shopping_cart</span> สั่งซื้อเลย</button>
+          </div>
+        </div><!-- end #contentContact -->
+      `;
+    }
+
+    function switchExtTab(tab) {
+      const orderContent = document.getElementById('contentOrder');
+      const contactContent = document.getElementById('contentContact');
+      const tabOrder = document.getElementById('tabOrder');
+      const tabContact = document.getElementById('tabContact');
+      if (tab === 'order') {
+        orderContent.style.display = 'block';
+        contactContent.style.display = 'none';
+        tabOrder.classList.add('active');
+        tabContact.classList.remove('active');
+      } else {
+        orderContent.style.display = 'none';
+        contactContent.style.display = 'block';
+        tabOrder.classList.remove('active');
+        tabContact.classList.add('active');
+      }
+    }
+
+    async function submitOrder() {
+      const name = document.getElementById('custName').value.trim();
+      const email = document.getElementById('custEmail').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const address = document.getElementById('deliveryAddress').value.trim();
+      if (!name) { showToast('กรุณากรอกชื่อ'); return; }
+      if (!email) { showToast('กรุณากรอกอีเมล'); return; }
+      if (selectedDelivery === 'delivery' && !address) { showToast('กรุณากรอกที่อยู่จัดส่ง'); return; }
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-icons-round" style="animation:spin 1s linear infinite">autorenew</span> กำลังส่ง...';
+      const items = cartItems.map(i => ({ productId: i.id, name: i.name, price: i.price, qty: i.qty, emoji: i.emoji || '📦' }));
+      const { total, feeAmount } = recalcTotal();
+      try {
+        const res = await fetch(API + '/guest-order', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items, subtotal, feeAmount, total, paymentMethod: selectedPayment, deliveryMethod: selectedDelivery, address: address || '', customerName: name, customerEmail: email, customerPhone: phone })
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'เกิดข้อผิดพลาด'); btn.disabled = false; btn.innerHTML = '<span class="material-icons-round">check_circle</span> ยืนยันสั่งซื้อ'; return; }
+        document.getElementById('successOrderId').textContent = data.orderId;
+        document.getElementById('successOverlay').style.display = 'flex';
+      } catch {
+        showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-icons-round">check_circle</span> ยืนยันสั่งซื้อ';
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    init();
+  </script>
+</body>
+</html>
