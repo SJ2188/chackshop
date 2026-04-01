@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sukjai by Chackshop - ร้านค้าออนไลน์</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --primary: #FF6B00; --primary-dark: #E55C00; --secondary: #1A1A2E;
+      --accent: #FFBA08; --bg: #F5F5F7; --white: #FFFFFF;
+      --gray-100: #F8F9FA; --gray-200: #E9ECEF; --gray-300: #DEE2E6;
+      --gray-400: #CED4DA; --gray-500: #ADB5BD; --gray-600: #6C757D;
+      --gray-700: #495057; --gray-800: #343A40; --text: #1A1A2E;
+      --text-light: #6C757D; --success: #00C853; --danger: #FF3D00;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08); --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+      --radius-xl: 20px; --radius-full: 9999px;
+    }
+    body { font-family: 'Prompt', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 80px; overflow-x: hidden; }
+
+    /* Header */
+    .header { background: var(--primary); color: white; padding: 12px 16px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-md); }
+    .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .logo span { color: var(--accent); }
+    .header-actions { display: flex; gap: 8px; margin-left: auto; }
+    .icon-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(255,255,255,0.2); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; }
+    .icon-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.3); }
+    .badge { position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; color: var(--secondary); cursor: pointer; border: 2px solid rgba(255,255,255,0.3); }
+    .search-bar { display: flex; align-items: center; background: white; border-radius: var(--radius-full); padding: 0 16px; height: 44px; gap: 8px; }
+    .search-bar .material-icons-round { color: var(--gray-500); font-size: 22px; }
+    .search-bar input { flex: 1; border: none; outline: none; font-size: 15px; font-family: inherit; }
+    .search-bar input::placeholder { color: var(--gray-400); }
+
+    /* Promo Banner */
+    .promo-banner { margin: 12px 16px; border-radius: var(--radius-lg); overflow: hidden; position: relative; background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 50%, #FFBA08 100%); color: white; padding: 20px; min-height: 140px; display: flex; flex-direction: column; justify-content: center; box-shadow: var(--shadow-md); }
+    .promo-badge { background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; width: fit-content; margin-bottom: 8px; }
+    .promo-title { font-size: 24px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+    .promo-subtitle { font-size: 14px; opacity: 0.9; }
+
+    /* Sections */
+    .section { padding: 0 16px; margin-bottom: 20px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .section-title { font-size: 18px; font-weight: 700; }
+    .section-link { font-size: 14px; color: var(--primary); text-decoration: none; font-weight: 500; cursor: pointer; }
+
+    /* Categories - 3-col grid, equal height cards */
+    .categories-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 4px 0 12px; }
+    .category-card { background: white; border-radius: 16px; padding: 12px 6px 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.08); cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); border: 2.5px solid transparent; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+    .category-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 46px; border-radius: 14px 14px 50% 50%; opacity: 0.12; }
+    .category-card:active { transform: scale(0.93); }
+    .category-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.13); }
+    .category-card.selected { border-color: var(--primary); }
+    .category-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; position: relative; z-index: 1; flex-shrink: 0; }
+    .category-name { font-size: 10px; font-weight: 700; line-height: 1.2; color: var(--gray-700); position: relative; z-index: 1; margin-top: 4px; padding: 0 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .category-count { display: inline-block; background: var(--primary); color: white; font-size: 7px; font-weight: 700; padding: 1px 4px; border-radius: 6px; margin-top: 4px; position: relative; z-index: 1; flex-shrink: 0; }
+
+    /* Quick Tags */
+    .quick-tags { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .quick-tags::-webkit-scrollbar { display: none; }
+    .quick-tag { background: white; border: 1.5px solid var(--gray-200); border-radius: var(--radius-full); padding: 8px 16px; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
+    .quick-tag.active, .quick-tag:active { background: var(--primary); border-color: var(--primary); color: white; }
+
+    /* Edit Profile Modal */
+    .edit-profile-modal, .address-modal, .payment-method-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+    .edit-profile-modal .modal-overlay, .address-modal .modal-overlay, .payment-method-modal .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+    .edit-profile-modal .modal-content, .address-modal .modal-content, .payment-method-modal .modal-content { position: relative; background: white; border-radius: var(--radius-xl) var(--radius-xl) 0 0; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 24px; }
+    .edit-profile-modal .modal-handle, .address-modal .modal-handle, .payment-method-modal .modal-handle { width: 40px; height: 4px; background: var(--gray-300); border-radius: 2px; margin: 0 auto 20px; }
+    .edit-profile-modal .modal-title, .address-modal .modal-title, .payment-method-modal .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; text-align: center; }
+    .edit-profile-modal .form-group, .address-modal .form-group { margin-bottom: 16px; }
+    .edit-profile-modal .form-label, .address-modal .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; }
+    .edit-profile-modal .form-input, .address-modal .form-input, .address-modal .form-textarea { width: 100%; border: 1.5px solid var(--gray-300); border-radius: var(--radius-md); padding: 12px 14px; font-size: 15px; font-family: inherit; outline: none; background: white; }
+    .edit-profile-modal .form-input:focus, .address-modal .form-input:focus, .address-modal .form-textarea:focus { border-color: var(--primary); }
+    .address-modal .form-textarea { resize: none; min-height: 100px; }
+    .address-modal .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .edit-profile-modal .save-btn, .address-modal .save-btn { width: 100%; background: var(--primary); color: white; border: none; border-radius: var(--radius-xl); padding: 14px; font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 8px; }
+    .edit-profile-modal .cancel-btn, .address-modal .cancel-btn { width: 100%; background: var(--gray-100); color: var(--gray-600); border: none; border-radius: var(--radius-xl); padding: 12px; font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer; margin-top: 10px; }
+    .payment-method-modal .method-option { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-md); margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+    .payment-method-modal .method-option.selected { border-color: var(--primary); background: #FFF3E0; }
+    .payment-method-modal .method-option .material-icons-round { color: var(--primary); font-size: 24px; }
+    .payment-method-modal .method-option-title { font-weight: 600; font-size: 15px; }
+    .payment-method-modal .method-option-desc { font-size: 12px; color: var(--gray-500); }
+    .payment-method-modal .save-btn { width: 100%; background: var(--primary); color: white; border: none; border-radius: var(--radius-xl); padding: 14px; font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 16px; }
+    .payment-method-modal .cancel-btn { width: 100%; background: var(--gray-100); color: var(--gray-600); border: none; border-radius: var(--radius-xl); padding: 12px; font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer; margin-top: 10px; }
+
+    /* Products Grid */
+    .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .product-card { background: white; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); cursor: pointer; transition: all 0.2s; position: relative; }
+    .product-card:active { transform: scale(0.98); }
+    .product-image { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #f5f5f5; overflow: hidden; }
+    .product-image img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+    .product-image .emoji-fallback { font-size: 60px; }
+    .product-badge { position: absolute; top: 8px; left: 8px; background: var(--danger); color: white; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+    .product-badge.flash { background: linear-gradient(135deg, #FF3D00, #FF6B00); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+    .product-info { padding: 10px 12px 12px; }
+    .product-name { font-size: 14px; font-weight: 500; line-height: 1.4; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .product-price-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .product-price { font-size: 18px; font-weight: 700; color: var(--primary); }
+    .product-original { font-size: 12px; color: var(--gray-400); text-decoration: line-through; }
+    .product-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .product-unit { font-size: 11px; color: var(--gray-500); }
+    .add-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(255,107,0,0.3); }
+    .add-btn:active { transform: scale(0.9); }
+    .stock-low { font-size: 10px; color: var(--danger); font-weight: 600; }
+
+    /* Flash Sale */
+    .flash-sale { background: linear-gradient(135deg, #FF3D00 0%, #FF6B00 100%); border-radius: var(--radius-lg); padding: 16px; color: white; margin: 0 16px 16px; }
+    .flash-sale-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .flash-sale-title { font-size: 16px; font-weight: 700; }
+    .timer-box { background: white; color: var(--danger); font-size: 13px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .timer-sep { font-weight: 700; }
+
+    /* Bottom Navigation */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); box-shadow: 0 -2px 12px rgba(0,0,0,0.08); z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 12px; cursor: pointer; transition: all 0.2s; border: none; background: none; }
+    .nav-item .material-icons-round { font-size: 24px; color: var(--gray-500); transition: all 0.2s; }
+    .nav-item span { font-size: 11px; font-weight: 500; color: var(--gray-500); transition: all 0.2s; }
+    .nav-item.active .material-icons-round { color: var(--primary); filter: drop-shadow(0 0 4px rgba(255,107,0,0.4)); }
+    .nav-item.active span { color: var(--primary); }
+
+    /* Cart Drawer */
+    .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; }
+    .cart-overlay.active { opacity: 1; visibility: visible; }
+    .cart-drawer { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: var(--radius-xl) var(--radius-xl) 0 0; max-height: 85vh; z-index: 201; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; }
+    .cart-drawer.active { transform: translateY(0); }
+    .cart-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--gray-200); }
+    .cart-title { font-size: 18px; font-weight: 700; }
+    .cart-close { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--gray-100); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .cart-items { flex: 1; overflow-y: auto; padding: 12px 20px; }
+
+    /* Swipeable Cart Item */
+    .cart-item-wrapper { position: relative; overflow: hidden; margin-bottom: 8px; border-radius: var(--radius-md); }
+    .cart-item { display: flex; gap: 12px; padding: 12px; background: white; position: relative; z-index: 1; transition: transform 0.2s; }
+    .cart-item.swiped { transform: translateX(-80px); }
+    .swipe-actions { position: absolute; right: 0; top: 0; bottom: 0; display: flex; }
+    .swipe-delete { background: var(--danger); color: white; border: none; padding: 0 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; font-weight: 600; }
+
+    .cart-item-image { width: 64px; height: 64px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+    .cart-item-info { flex: 1; min-width: 0; }
+    .cart-item-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cart-item-price { font-size: 16px; font-weight: 700; color: var(--primary); }
+    .cart-item-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--gray-300); background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: var(--gray-600); }
+    .qty-btn:active { border-color: var(--primary); color: var(--primary); }
+    .qty-value { font-size: 15px; font-weight: 600; min-width: 24px; text-align: center; }
+    .cart-footer { padding: 16px 20px calc(16px + env(safe-area-inset-bottom)); border-top: 1px solid var(--gray-200); background: white; }
+    .cart-summary { margin-bottom: 12px; }
+    .cart-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px; }
+    .cart-row.total { font-size: 18px; font-weight: 700; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--gray-300); }
+    .checkout-btn { width: 100%; height: 52px; border: none; border-radius: var(--radius-xl); background: var(--primary); color: white; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 16px rgba(255,107,0,0.3); }
+    .checkout-btn:active { transform: scale(0.98); background: var(--primary-dark); }
+    .cart-empty { text-align: center; padding: 40px 20px; }
+    .cart-empty .material-icons-round { font-size: 64px; color: var(--gray-300); margin-bottom: 12px; }
+    .cart-empty-text { font-size: 16px; color: var(--gray-500); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--secondary); color: white; padding: 12px 24px; border-radius: var(--radius-xl); font-size: 14px; font-weight: 500; z-index: 300; opacity: 0; visibility: hidden; transition: all 0.3s; white-space: nowrap; }
+    .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+    /* Modal Overlay */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+
+    /* Auth Modal */
+    .auth-modal { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: var(--radius-xl) var(--radius-xl) 0 0; max-height: 90vh; z-index: 201; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; }
+    .auth-modal.active { transform: translateY(0); }
+    .auth-handle { width: 40px; height: 4px; background: var(--gray-300); border-radius: 2px; margin: 12px auto; }
+    .auth-content { padding: 0 24px 24px; overflow-y: auto; flex: 1; }
+    .auth-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 6px; display: block; }
+    .form-input { width: 100%; height: 48px; border: 1.5px solid var(--gray-300); border-radius: var(--radius-md); padding: 0 16px; font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--primary); }
+    .auth-btn { width: 100%; height: 52px; border: none; border-radius: var(--radius-xl); background: var(--primary); color: white; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
+    .auth-btn:active { transform: scale(0.98); }
+    .auth-btn.secondary { background: var(--gray-200); color: var(--text); }
+    .auth-switch { text-align: center; margin-top: 16px; font-size: 14px; color: var(--gray-600); }
+    .auth-switch a { color: var(--primary); font-weight: 600; cursor: pointer; }
+
+    /* Product Modal */
+    .product-modal { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: var(--radius-xl) var(--radius-xl) 0 0; max-height: 90vh; z-index: 201; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; }
+    .product-modal.active { transform: translateY(0); }
+    .modal-handle { width: 40px; height: 4px; background: var(--gray-300); border-radius: 2px; margin: 12px auto; }
+    .modal-image { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 100px; }
+    .modal-content { padding: 20px; overflow-y: auto; flex: 1; }
+    .modal-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .modal-price { font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .modal-unit { font-size: 14px; color: var(--gray-500); margin-bottom: 16px; }
+    .modal-desc { font-size: 14px; color: var(--gray-600); line-height: 1.6; margin-bottom: 16px; }
+    .quantity-selector { display: flex; align-items: center; gap: 16px; background: var(--gray-100); border-radius: var(--radius-lg); padding: 8px; width: fit-content; }
+    .quantity-selector button { width: 40px; height: 40px; border-radius: 50%; border: none; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; font-weight: 600; box-shadow: var(--shadow-sm); }
+    .quantity-selector button:active { background: var(--primary); color: white; }
+    .quantity-selector span { font-size: 20px; font-weight: 700; min-width: 40px; text-align: center; }
+    .modal-footer { padding: 16px 20px calc(16px + env(safe-area-inset-bottom)); border-top: 1px solid var(--gray-200); display: flex; gap: 12px; }
+    .modal-footer .add-to-cart { flex: 1; height: 52px; border: none; border-radius: var(--radius-xl); background: var(--primary); color: white; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    /* Payment Modal */
+    .payment-modal { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: var(--radius-xl) var(--radius-xl) 0 0; max-height: 90vh; z-index: 201; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; }
+    .payment-modal.active { transform: translateY(0); }
+    .payment-options { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .payment-option { display: flex; align-items: center; gap: 16px; padding: 16px; border: 2px solid var(--gray-200); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; }
+    .payment-option.selected { border-color: var(--primary); background: rgba(255,107,0,0.05); }
+    .payment-option .material-icons-round { font-size: 32px; color: var(--primary); }
+    .payment-option-info { flex: 1; }
+    .payment-option-title { font-size: 16px; font-weight: 600; }
+    .payment-option-desc { font-size: 12px; color: var(--gray-500); }
+    .fee-badge { display: inline-block; background: var(--danger); color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
+    .delivery-option { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-md); margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+    .delivery-option.selected { border-color: var(--primary); background: rgba(255,107,0,0.05); }
+    .delivery-option .material-icons-round { font-size: 24px; color: var(--primary); }
+    .bank-info { background: #E3F2FD; border-radius: var(--radius-md); padding: 14px; margin: 12px 0; border: 1.5px solid #BBDEFB; }
+    .bank-info-title { font-weight: 700; font-size: 14px; color: var(--primary); margin-bottom: 8px; }
+    .bank-info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+    .bank-info-label { color: var(--gray-600); }
+    .bank-info-value { font-weight: 600; color: var(--text); }
+    .qr-section { text-align: center; padding: 16px; background: #F5F5F5; border-radius: var(--radius-md); margin: 12px 0; }
+    .qr-section img { max-width: 200px; border-radius: var(--radius-md); }
+    .qr-hint { font-size: 12px; color: var(--gray-500); margin-top: 8px; }
+
+    /* Address Section */
+    .address-section { margin-top: 20px; }
+    .address-input { width: 100%; min-height: 80px; border: 1.5px solid var(--gray-300); border-radius: var(--radius-md); padding: 12px 16px; font-size: 14px; font-family: inherit; resize: none; outline: none; }
+    .address-input:focus { border-color: var(--primary); }
+
+    /* Page views */
+    .page { display: none; }
+    .page.active { display: block; }
+    .content { max-width: 480px; margin: 0 auto; }
+
+    /* Profile Page */
+    .profile-header { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 24px 16px; text-align: center; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: white; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 700; color: var(--primary); border: 3px solid rgba(255,255,255,0.5); }
+    .profile-name { font-size: 20px; font-weight: 700; }
+    .profile-email { font-size: 14px; opacity: 0.9; }
+    .profile-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px; }
+    .stat-card { background: white; border-radius: var(--radius-md); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); }
+    .stat-value { font-size: 24px; font-weight: 700; color: var(--primary); }
+    .stat-label { font-size: 12px; color: var(--gray-500); }
+    .menu-list { margin: 0 16px; background: white; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--gray-100); cursor: pointer; transition: background 0.2s; }
+    .menu-item:last-child { border-bottom: none; }
+    .menu-item:active { background: var(--gray-100); }
+    .menu-item .material-icons-round { color: var(--primary); font-size: 24px; }
+    .menu-item-text { flex: 1; font-weight: 500; }
+    .menu-item-arrow { color: var(--gray-400); }
+
+    /* Orders Page */
+    .order-card { background: white; border-radius: var(--radius-md); margin: 0 16px 12px; overflow: hidden; box-shadow: var(--shadow-sm); }
+    .order-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--gray-100); }
+    .order-id { font-size: 12px; color: var(--gray-500); }
+    .order-status { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; }
+    .order-status.pending { background: #FFF3E0; color: #E65100; }
+    .order-status.completed { background: #E8F5E9; color: #2E7D32; }
+    .order-status.shipping { background: #E3F2FD; color: #1565C0; }
+    .order-items { padding: 12px 16px; }
+    .order-item { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+    .order-item:last-child { border-bottom: none; }
+    .order-item-emoji { font-size: 32px; }
+    .order-item-info { flex: 1; }
+    .order-item-name { font-size: 14px; font-weight: 500; }
+    .order-item-qty { font-size: 12px; color: var(--gray-500); }
+    .order-item-price { font-size: 14px; font-weight: 600; color: var(--primary); }
+    .order-footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-top: 1px solid var(--gray-100); }
+    .order-total { font-size: 16px; font-weight: 700; color: var(--primary); }
+    .order-date { font-size: 12px; color: var(--gray-500); }
+
+    /* Loading */
+    .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--gray-200); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 12px; font-size: 14px; color: var(--gray-500); }
+
+    /* Success Screen */
+    .success-screen { text-align: center; padding: 40px 20px; }
+    .success-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--success); color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .success-icon .material-icons-round { font-size: 48px; }
+    .success-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .success-desc { font-size: 14px; color: var(--gray-500); margin-bottom: 24px; }
+    .success-order-id { font-size: 16px; font-weight: 600; color: var(--primary); margin-bottom: 24px; }
+    .success-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: var(--radius-xl); font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <!-- Home Page -->
+  <div class="page active" id="page-home">
+    <header class="header">
+      <div class="header-top">
+        <div class="logo">Sukjai by <span>Chackshop</span></div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="openCart()">
+            <span class="material-icons-round">shopping_cart</span>
+            <span class="badge" id="cartBadge" style="display:none">0</span>
+          </button>
+          <div class="user-avatar" id="userAvatar" onclick="openAuthModal('login')" style="display:none"></div>
+          <button class="icon-btn" id="loginBtn" onclick="openAuthModal('login')">
+            <span class="material-icons-round">person</span>
+          </button>
+        </div>
+      </div>
+      <div class="search-bar">
+        <span class="material-icons-round">search</span>
+        <input type="text" placeholder="ค้นหาสินค้าที่คุณต้องการ..." id="searchInput" oninput="handleSearch(this.value)">
+      </div>
+    </header>
+    <div class="content">
+      <div class="promo-banner" onclick="showToast('โปรโมชั่นพิเศษ! สั่งวันนี้ส่งฟรี! 🎉')">
+        <div class="promo-badge">🎉 มาใหม่!</div>
+        <div class="promo-title">สั่งวันนี้<br>ส่งฟรี!</div>
+        <div class="promo-subtitle">รายการแรก ส่งฟรีไม่มีขั้นต่ำ</div>
+      </div>
+      <div class="section" style="margin-bottom:8px;">
+        <div class="quick-tags" id="quickTags">
+          <button class="quick-tag active" onclick="filterCategory(this, 'all')">ทั้งหมด</button>
+        </div>
+      </div>
+      <div class="flash-sale">
+        <div class="flash-sale-header">
+          <div class="flash-sale-title">⚡ FLASH SALE</div>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <span class="timer-box" id="timerH">08</span><span class="timer-sep">:</span><span class="timer-box" id="timerM">45</span><span class="timer-sep">:</span><span class="timer-box" id="timerS">30</span>
+          </div>
+        </div>
+        <div class="products-grid" id="flashSaleGrid"></div>
+      </div>
+      <div class="section">
+        <div class="section-header"><div class="section-title">หมวดหมู่สินค้า</div></div>
+        <div class="categories-wrap" id="categoriesGrid"></div>
+      </div>
+      <div class="section">
+        <div class="section-header"><div class="section-title">สินค้าทั้งหมด</div></div>
+        <div class="products-grid" id="productsGrid">
+          <div class="loading"><div class="spinner"></div><div class="loading-text">กำลังโหลดสินค้า...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Page -->
+  <div class="page" id="page-orders">
+    <header class="header">
+      <div class="header-top">
+        <div class="logo">รายการ<span>สั่งซื้อ</span></div>
+      </div>
+    </header>
+    <div id="ordersContent">
+      <div class="loading"><div class="spinner"></div><div class="loading-text">กำลังโหลด...</div></div>
+    </div>
+  </div>
+
+  <!-- Profile Page -->
+  <div class="page" id="page-profile">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar">T</div>
+      <div class="profile-name" id="profileName">แขก</div>
+      <div class="profile-email" id="profileEmail">ยังไม่ได้เข้าสู่ระบบ</div>
+    </div>
+    <div class="profile-stats">
+      <div class="stat-card"><div class="stat-value" id="statOrders">0</div><div class="stat-label">คำสั่งซื้อ</div></div>
+      <div class="stat-card"><div class="stat-value" id="statSpent">฿0</div><div class="stat-label">฿ที่ใช้ไป</div></div>
+    </div>
+    <div class="menu-list">
+      <div class="menu-item" onclick="showPage('orders')">
+        <span class="material-icons-round">receipt_long</span>
+        <span class="menu-item-text">รายการสั่งซื้อ</span>
+        <span class="material-icons-round menu-item-arrow">chevron_right</span>
+      </div>
+      <div class="menu-item" onclick="openProfileEdit()">
+        <span class="material-icons-round">manage_accounts</span>
+        <span class="menu-item-text">แก้ไขโปรไฟล์</span>
+        <span class="material-icons-round menu-item-arrow">chevron_right</span>
+      </div>
+      <div class="menu-item" onclick="openAddressModal()">
+        <span class="material-icons-round">location_on</span>
+        <span class="menu-item-text">ที่อยู่จัดส่ง</span>
+        <span class="material-icons-round menu-item-arrow">chevron_right</span>
+      </div>
+      <div class="menu-item" onclick="openPaymentMethodModal()">
+        <span class="material-icons-round">credit_card</span>
+        <span class="menu-item-text">วิธีชำระเงิน</span>
+        <span class="material-icons-round menu-item-arrow">chevron_right</span>
+      </div>
+      <div class="menu-item" onclick="logout()">
+        <span class="material-icons-round" style="color:var(--danger)">logout</span>
+        <span class="menu-item-text" style="color:var(--danger)">ออกจากระบบ</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="showPage('home', this)"><span class="material-icons-round">home</span><span>หน้าแรก</span></button>
+    <button class="nav-item" onclick="if(!isLoggedIn()){openAuthModal('login');return;} showPage('orders', this)"><span class="material-icons-round">receipt_long</span><span>ออเดอร์</span></button>
+    <button class="nav-item" onclick="openCart()"><span class="material-icons-round">shopping_cart</span><span>ตะกร้า</span></button>
+    <button class="nav-item" onclick="showPage('profile', this)"><span class="material-icons-round">person</span><span>โปรไฟล์</span></button>
+  </nav>
+
+  <!-- Cart Drawer -->
+  <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <div class="cart-title">🛒 ตะกร้าสินค้า</div>
+      <button class="cart-close" onclick="closeCart()"><span class="material-icons-round" style="font-size:20px;">close</span></button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty"><span class="material-icons-round">shopping_cart</span><div class="cart-empty-text">ตะกร้าว่างเปล่า<br>ไปเลือกสินค้ากันเถอะ!</div></div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+      <div class="cart-summary">
+        <div class="cart-row"><span>รวม (<span id="cartItemCount">0</span> ชิ้น)</span><span id="cartSubtotal">฿0</span></div>
+        <div class="cart-row"><span>ส่วนลด</span><span style="color:var(--success);" id="cartDiscount">-฿0</span></div>
+        <div class="cart-row total"><span>รวมทั้งสิ้น</span><span style="color:var(--primary);" id="cartTotal">฿0</span></div>
+      </div>
+      <button class="checkout-btn" onclick="goToPayment()"><span class="material-icons-round">local_shipping</span>สั่งซื้อเลย</button>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay" id="authOverlay" onclick="closeAuthModal()"></div>
+  <div class="auth-modal" id="authModal">
+    <div class="auth-handle"></div>
+    <div class="auth-content">
+      <div class="auth-title" id="authTitle">เข้าสู่ระบบ</div>
+      <div id="authForm">
+        <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="authEmail" placeholder="ton@email.com"></div>
+        <div class="form-group"><label class="form-label">รหัสผ่าน</label><input type="password" class="form-input" id="authPassword" placeholder="••••••"></div>
+        <div class="form-group" id="nameGroup" style="display:none;"><label class="form-label">ชื่อ</label><input type="text" class="form-input" id="authName" placeholder="ชื่อของคุณ"></div>
+        <button class="auth-btn" id="authSubmitBtn" onclick="handleAuth()">เข้าสู่ระบบ</button>
+        <div class="auth-switch" id="authSwitch">ยังไม่มีบัญชี? <a onclick="toggleAuthMode()">สมัครสมาชิก</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="productOverlay" onclick="closeProductModal()"></div>
+  <div class="product-modal" id="productModal">
+    <div class="modal-handle"></div>
+    <div class="modal-image" id="modalImage">🍜</div>
+    <div class="modal-content">
+      <div class="modal-name" id="modalName">ชื่อสินค้า</div>
+      <div class="modal-price" id="modalPrice">฿0</div>
+      <div class="modal-unit" id="modalUnit">ต่อชิ้น</div>
+      <div class="modal-desc" id="modalDesc">รายละเอียดสินค้า</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <span style="font-size:14px;font-weight:600;">จำนวน</span>
+        <div class="quantity-selector"><button onclick="changeModalQty(-1)">−</button><span id="modalQty">1</span><button onclick="changeModalQty(1)">+</button></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="add-to-cart" onclick="addFromModal()"><span class="material-icons-round">add_shopping_cart</span>เพิ่มลงตะกร้า</button>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="paymentOverlay" onclick="closePaymentModal()"></div>
+  <div class="payment-modal" id="paymentModal">
+    <div class="modal-handle"></div>
+    <div class="auth-content" style="padding-top:0;">
+      <div class="auth-title">ชำระเงิน</div>
+      <div class="cart-summary" style="background:var(--gray-100);padding:16px;border-radius:var(--radius-md);margin-bottom:16px;">
+        <div class="cart-row"><span>ราคาสินค้า (<span id="payItemCount">0</span> ชิ้น)</span><span id="paySubtotal">฿0</span></div>
+        <div class="cart-row" id="payFeeRow" style="display:none;"><span>ค่าธรรมเนียม <span id="payFeePercent" style="color:var(--danger);"></span></span><span id="payFeeAmount" style="color:var(--danger);">+฿0</span></div>
+        <div class="cart-row total"><span>ยอดชำระ</span><span style="color:var(--primary);" id="payTotal">฿0</span></div>
+      </div>
+
+      <!-- Delivery Option -->
+      <div class="section-title" style="margin-bottom:8px;">รูปแบบการรับสินค้า</div>
+      <div class="delivery-options" id="deliveryOptions">
+        <div class="delivery-option selected" onclick="selectDelivery(this, 'pickup')" data-delivery="pickup">
+          <span class="material-icons-round">store</span>
+          <div><div style="font-weight:600;font-size:14px;">รับเองที่ร้าน</div><div style="font-size:12px;color:var(--gray-500);">ไม่มีค่าจัดส่ง</div></div>
+        </div>
+        <div class="delivery-option" onclick="selectDelivery(this, 'delivery')" data-delivery="delivery">
+          <span class="material-icons-round">local_shipping</span>
+          <div><div style="font-weight:600;font-size:14px;">จัดส่งตามที่อยู่</div><div style="font-size:12px;color:var(--gray-500);">บริการจัดส่งถึงที่</div></div>
+        </div>
+      </div>
+
+      <!-- Address Section (only visible when delivery selected) -->
+      <div class="address-section" id="addressSection" style="display:none;">
+        <div class="form-label">ที่อยู่จัดส่ง</div>
+        <textarea class="address-input" id="deliveryAddress" placeholder="บ้านเลขที่ ซอย ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="section-title" style="margin-bottom:8px;margin-top:16px;">เลือกวิธีชำระเงิน</div>
+      <div class="payment-options" id="paymentOptions">
+        <div class="payment-option selected" onclick="selectPayment(this, 'cod')" data-method="cod">
+          <span class="material-icons-round">payments</span>
+          <div class="payment-option-info">
+            <div class="payment-option-title">เก็บเงินปลายทาง (COD)<span class="fee-badge" id="codFeeBadge"></span></div>
+            <div class="payment-option-desc">จ่ายเงินเมื่อได้รับสินค้า</div>
+          </div>
+        </div>
+        <div class="payment-option" onclick="selectPayment(this, 'transfer')" data-method="transfer">
+          <span class="material-icons-round">account_balance</span>
+          <div class="payment-option-info">
+            <div class="payment-option-title">โอนผ่านธนาคาร<span class="fee-badge" id="transferFeeBadge"></span></div>
+            <div class="payment-option-desc">โอนเงินเข้าบัญชีธนาคาร</div>
+          </div>
+        </div>
+        <div class="payment-option" onclick="selectPayment(this, 'qrcode')" data-method="qrcode">
+          <span class="material-icons-round">qr_code_2</span>
+          <div class="payment-option-info">
+            <div class="payment-option-title">QR Code<span class="fee-badge" id="qrFeeBadge"></span></div>
+            <div class="payment-option-desc">สแกน QR ผ่านแอปธนาคาร</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bank Transfer Info (shown when transfer selected) -->
+      <div class="bank-info" id="bankInfo" style="display:none;">
+        <div class="bank-info-title">🏦 ข้อมูลบัญชีโอนเงิน</div>
+        <div class="bank-info-row"><span class="bank-info-label">ธนาคาร</span><span class="bank-info-value" id="bankNameDisplay">กรุงไทย</span></div>
+        <div class="bank-info-row"><span class="bank-info-label">เลขที่บัญชี</span><span class="bank-info-value" id="bankAccountDisplay">854-3-10966-3</span></div>
+        <div class="bank-info-row"><span class="bank-info-label">ชื่อบัญชี</span><span class="bank-info-value" id="bankAccountNameDisplay">บริษัท สุขใจไอที จำกัด</span></div>
+      </div>
+
+      <!-- QR Code Section (shown when QR selected) -->
+      <div class="qr-section" id="qrSection" style="display:none;">
+        <img id="qrCodeImg" src="/qr-payment.png" alt="QR Code" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div id="qrFallback" style="display:none;color:var(--gray-500);font-size:13px;">กรุณาอัปโหลด QR Code ในหน้า Admin</div>
+        <div class="qr-hint">สแกน QR Code เพื่อชำระเงิน</div>
+      </div>
+
+      <button class="auth-btn" style="margin-top:20px;" onclick="confirmPayment()"><span class="material-icons-round">check_circle</span>ยืนยันการสั่งซื้อ</button>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" id="successOverlay" onclick="closeSuccessModal()"></div>
+  <div class="payment-modal" id="successModal">
+    <div class="auth-handle"></div>
+    <div class="auth-content" style="padding-top:0;">
+      <div class="success-screen">
+        <div class="success-icon"><span class="material-icons-round">check</span></div>
+        <div class="success-title">สั่งซื้อสำเร็จ!</div>
+        <div class="success-desc">ขอบคุณที่สั่งซื้อ รอรับสินค้าได้เลย</div>
+        <div class="success-order-id" id="successOrderId">Order #12345</div>
+        <button class="success-btn" onclick="closeSuccessModal()"><span class="material-icons-round">home</span>กลับหน้าแรก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">เพิ่มลงตะกร้าแล้ว!</div>
+
+  <!-- Edit Profile Modal -->
+  <div class="edit-profile-modal" id="editProfileModal">
+    <div class="modal-overlay" onclick="closeEditProfileModal()"></div>
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <div class="modal-title">✏️ แก้ไขโปรไฟล์</div>
+      <div class="form-group"><label class="form-label">ชื่อ</label><input type="text" class="form-input" id="editProfileName" placeholder="ชื่อของคุณ"></div>
+      <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="editProfileEmail" placeholder="ton@email.com"></div>
+      <button class="save-btn" onclick="saveProfile()">💾 บันทึก</button>
+      <button class="cancel-btn" onclick="closeEditProfileModal()">ยกเลิก</button>
+    </div>
+  </div>
+
+  <!-- Address Modal -->
+  <div class="address-modal" id="addressModal">
+    <div class="modal-overlay" onclick="closeAddressModal()"></div>
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <div class="modal-title">📍 ที่อยู่จัดส่ง</div>
+      <div class="form-group"><label class="form-label">บ้านเลขที่ / ที่อยู่</label><input type="text" class="form-input" id="addrHouse" placeholder="เช่น 123/45 หมู่บ้านกิตติพงษ์"></div>
+      <div class="form-group"><label class="form-label">ซอย (ไม่บังคับ)</label><input type="text" class="form-input" id="addrSoi" placeholder="เช่น ซอยสุขุมวิท 5"></div>
+      <div class="form-group"><label class="form-label">ถนน (ไม่บังคับ)</label><input type="text" class="form-input" id="addrStreet" placeholder="เช่น ถนนสุขุมวิท"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">แขวง / ตำบล</label><input type="text" class="form-input" id="addrSubdistrict" placeholder="เช่น คลองต้นไทร"></div>
+        <div class="form-group"><label class="form-label">เขต / อำเภอ</label><input type="text" class="form-input" id="addrDistrict" placeholder="เช่น คลองเตย"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">จังหวัด</label><input type="text" class="form-input" id="addrProvince" placeholder="เช่น กรุงเทพฯ"></div>
+        <div class="form-group"><label class="form-label">รหัสไปรษณีย์</label><input type="text" class="form-input" id="addrZip" placeholder="เช่น 10110" maxlength="5"></div>
+      </div>
+      <div class="form-group"><label class="form-label">เบอร์โทรศัพท์ (ไม่บังคับ)</label><input type="tel" class="form-input" id="addrPhone" placeholder="เช่น 081-234-5678"></div>
+      <button class="save-btn" onclick="saveAddress()">💾 บันทึกที่อยู่</button>
+      <button class="cancel-btn" onclick="closeAddressModal()">ยกเลิก</button>
+    </div>
+  </div>
+
+  <!-- Payment Method Modal -->
+  <div class="payment-method-modal" id="paymentMethodModal">
+    <div class="modal-overlay" onclick="closePaymentMethodModal()"></div>
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <div class="modal-title">💳 วิธีชำระเงิน</div>
+      <div class="method-option" id="pm-cod" onclick="selectMethod('cod','pm-cod')"><span class="material-icons-round">payments</span><div><div class="method-option-title">เก็บเงินปลายทาง (COD)</div><div class="method-option-desc">จ่ายเงินเมื่อได้รับสินค้า</div></div></div>
+      <div class="method-option" id="pm-transfer" onclick="selectMethod('transfer','pm-transfer')"><span class="material-icons-round">account_balance</span><div><div class="method-option-title">โอนผ่านธนาคาร</div><div class="method-option-desc">โอนเงินเข้าบัญชีธนาคาร</div></div></div>
+      <div class="method-option" id="pm-qrcode" onclick="selectMethod('qrcode','pm-qrcode')"><span class="material-icons-round">qr_code_2</span><div><div class="method-option-title">QR Code</div><div class="method-option-desc">สแกน QR ผ่านแอปธนาคาร</div></div></div>
+      <button class="save-btn" onclick="savePaymentMethod()">💾 บันทึก</button>
+      <button class="cancel-btn" onclick="closePaymentMethodModal()">ยกเลิก</button>
+    </div>
+  </div>
+
+  <script>
+    const API = `${window.location.protocol}//${window.location.hostname}:3002/api`;
+    let products = [];
+    let cart = [];
+    let user = null;
+    let token = localStorage.getItem('token');
+    let authMode = 'login';
+    let selectedPayment = 'cod';
+    let selectedDelivery = 'pickup';
+    let paymentSettings = {};
+    let modalProduct = null;
+    let modalQty = 1;
+
+    // ============ Init ============
+    async function init() {
+      await loadProducts();
+      if (token) await checkAuth();
+      startTimer();
+    }
+
+    async function loadProducts() {
+      try {
+        const res = await fetch(`${API}/products`);
+        if (!res.ok) throw new Error('Server error');
+        products = await res.json();
+        renderCategories();
+        renderProducts();
+        renderFlashSale();
+      } catch (e) {
+        document.getElementById('productsGrid').innerHTML = `<div style="text-align:center;padding:40px;color:var(--gray-500);">
+          <span class="material-icons-round" style="font-size:48px;color:var(--gray-300)">wifi_off</span>
+          <p style="margin-top:12px;font-weight:600;">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</p>
+          <p style="font-size:13px;margin-top:8px;">ตรวจสอบว่าเปิด URL นี้: <strong style="color:var(--primary)">http://localhost:3002</strong></p>
+          <p style="font-size:12px;margin-top:8px;color:var(--gray-500);">หรือรันคำสั่ง: <code style="background:#eee;padding:2px 6px;border-radius:4px;">cd ~/shop-online && npm start</code></p>
+        </div>`;
+      }
+    }
+
+    // ============ Render ============
+    function renderCategories() {
+      const cats = [...new Set(products.map(p => p.category))];
+      const quickTags = document.getElementById('quickTags');
+      quickTags.innerHTML = `<button class="quick-tag active" onclick="filterCategory(this, 'all')">ทั้งหมด</button>` +
+        cats.map(c => `<button class="quick-tag" onclick="filterCategory(this, '${c}')">${c}</button>`).join('');
+      
+      const grid = document.getElementById('categoriesGrid');
+
+      function getEmojiAndStyle(cat) {
+        const c = cat.toLowerCase();
+        if (c.includes('เนื้อ') || c.includes('ไก่') || c.includes('หมู') || c.includes('ปลา') || c.includes('กุ้ง')) return { emoji: '🥩', bg: 'linear-gradient(135deg,#FFEBEE,#FCE4EC)', tc: '#C62828' };
+        if (c.includes('ผัก') || c.includes('ผลไม้')) return { emoji: '🍎', bg: 'linear-gradient(135deg,#E8F5E9,#C8E6C9)', tc: '#2E7D32' };
+        if (c.includes('เครื่องดื่ม') || c.includes('น้ำ') || c.includes('ชา') || c.includes('กาแฟ') || c.includes('โซดา')) return { emoji: '🥤', bg: 'linear-gradient(135deg,#E3F2FD,#BBDEFB)', tc: '#1565C0' };
+        if (c.includes('ขนม') || c.includes('ของหวาน') || c.includes('เบเกอรี่') || c.includes('เค้ก') || c.includes('ไอศกรีม')) return { emoji: '🍰', bg: 'linear-gradient(135deg,#FFF8E1,#FFECB3)', tc: '#F57F17' };
+        if (c.includes('นม') || c.includes('เนย') || c.includes('ไข่') || c.includes('ชีส') || c.includes('โยเกิร์ต')) return { emoji: '🥛', bg: 'linear-gradient(135deg,#FAFAFA,#EEEEEE)', tc: '#616161' };
+        if (c.includes('น้ำมัน') || c.includes('ซอส') || c.includes('เครื่องปรุง') || c.includes('เค็ม') || c.includes('พริก')) return { emoji: '🧂', bg: 'linear-gradient(135deg,#FFF9C4,#FFF59D)', tc: '#F9A825' };
+        if (c.includes('ทำความสะอาด') || c.includes('ผงซัก') || c.includes('น้ำยา') || c.includes('สบู่') || c.includes('ซักล้าง')) return { emoji: '🧴', bg: 'linear-gradient(135deg,#E0F7FA,#B2EBF2)', tc: '#00838F' };
+        if (c.includes('ส่วนตัว') || c.includes('สุขภาพ') || c.includes('ยา') || c.includes('วิตามิน') || c.includes('ครีม') || c.includes('แชมพู')) return { emoji: '💊', bg: 'linear-gradient(135deg,#F3E5F5,#E1BEE7)', tc: '#7B1FA2' };
+        if (c.includes('ของใช้') || c.includes('เครื่องใช้') || c.includes('อุปกรณ์') || c.includes('พลาสติก') || c.includes('ภาชนะ') || c.includes('ครัว')) return { emoji: '🏠', bg: 'linear-gradient(135deg,#E8EAF6,#C5CAE9)', tc: '#283593' };
+        if (c.includes('อาหารแห้ง') || c.includes('สะดวก') || c.includes('บะหมี่') || c.includes('มาม่า') || c.includes('ราเมน') || c.includes('ข้าว')) return { emoji: '🍜', bg: 'linear-gradient(135deg,#FFF3E0,#FFE0B2)', tc: '#E65100' };
+        if (c.includes('ของว่าง') || c.includes('นักเก็ต') || c.includes('เฟรนช์ฟราย') || c.includes('ถั่ว') || c.includes('ลูกชุบ')) return { emoji: '🍿', bg: 'linear-gradient(135deg,#FFFDE7,#FFF9C4)', tc: '#F9A825' };
+        if (c.includes('ธัญ') || c.includes('แป้ง') || c.includes('งา') || c.includes('มะพร้าว')) return { emoji: '🌾', bg: 'linear-gradient(135deg,#FFF8E1,#FFECB3)', tc: '#E65100' };
+        return { emoji: '📦', bg: 'linear-gradient(135deg,#F5F5F7,#EEEEEE)', tc: '#757575' };
+      }
+
+      grid.innerHTML = cats.map(cat => {
+        const { emoji, bg, tc } = getEmojiAndStyle(cat);
+        const count = products.filter(p => p.category === cat).length;
+        return `<div class="category-card" onclick="selectCat(this,'${cat.replace(/'/g,"\\'")}')"><div class="category-icon" style="background:${bg}">${emoji}</div><div class="category-name" style="color:${tc}">${cat}</div><span class="category-count">${count} ชิ้น</span></div>`;
+      }).join('');
+    }
+
+    function selectCat(el, cat) {
+      document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      renderProducts(cat);
+      document.querySelectorAll('.quick-tag').forEach(t => { t.classList.remove('active'); if (t.textContent === cat) t.classList.add('active'); });
+    }
+    function renderProducts(filter = 'all') {
+      const grid = document.getElementById('productsGrid');
+      let filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-500);">ไม่พบสินค้าในหมวดนี้</div>';
+        return;
+      }
+      grid.innerHTML = filtered.map(p => createProductCard(p)).join('');
+    }
+
+    async function renderFlashSale() {
+      const grid = document.getElementById('flashSaleGrid');
+      try {
+        const res = await fetch(`${API}/flash-sale`);
+        const sale = await res.json();
+        if (sale.length === 0) {
+          document.querySelector('.flash-sale').style.display = 'none';
+          return;
+        }
+        grid.innerHTML = sale.slice(0, 8).map(p => createProductCard(p, true)).join('');
+      } catch {
+        grid.innerHTML = '<p style="color:white;text-align:center;padding:20px;">ไม่สามารถโหลด Flash Sale</p>';
+      }
+    }
+
+    function createProductCard(p, isFlash = false) {
+      const gradient = getGradient(p.category);
+      const imgTag = p.image ? `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><span class="emoji-fallback" style="display:none;">${p.emoji}</span>` : `<span class="emoji-fallback">${p.emoji}</span>`;
+      return `
+        <div class="product-card" onclick="openProductModal(${p.id})">
+          ${p.discount > 0 ? `<div class="product-badge ${isFlash ? 'flash' : ''}">-${p.discount}%</div>` : ''}
+          <div class="product-image" style="background:${gradient}">${imgTag}</div>
+          <div class="product-info">
+            <div class="product-name">${p.name}</div>
+            <div class="product-price-row">
+              <span class="product-price">฿${p.price}</span>
+              ${p.original > p.price ? `<span class="product-original">฿${p.original}</span>` : ''}
+            </div>
+            ${p.stock <= 10 ? `<div class="stock-low">เหลือ ${p.stock} ชิ้น</div>` : ''}
+            <div class="product-footer">
+              <span class="product-unit">${p.unit}</span>
+              <button class="add-btn" onclick="event.stopPropagation(); quickAdd(${p.id})"><span class="material-icons-round">add</span></button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getGradient(category) {
+      const gradients = { "อาหาร": "#FFF8E1", "เครื่องดื่ม": "#E3F2FD", "ขนม": "#FFF3E0", "ผลไม้": "#FFEBEE", "เนื้อสัตว์": "#FCE4EC", "ผัก": "#E8F5E9", "ของใช้": "#E0F7FA", "เครื่องปรุง": "#FFF9C4" };
+      return gradients[category] || "#F5F5F7";
+    }
+
+    // ============ Filter ============
+    function filterCategory(btn, category) {
+      document.querySelectorAll('.quick-tag').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderProducts(category);
+    }
+
+    function filterCategoryByCat(cat) {
+      document.querySelectorAll('.quick-tag').forEach(t => t.classList.remove('active'));
+      const tags = document.querySelectorAll('.quick-tag');
+      tags.forEach(t => { if (t.textContent.includes(cat) || t.textContent === 'ทั้งหมด') t.classList.add('active'); });
+      renderProducts(cat);
+    }
+
+    function handleSearch(query) {
+      if (!query) { renderProducts(); return; }
+      const results = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()) || p.category.toLowerCase().includes(query.toLowerCase()));
+      const grid = document.getElementById('productsGrid');
+      if (results.length === 0) {
+        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-500);">ไม่พบสินค้าที่ค้นหา</div>';
+      } else {
+        grid.innerHTML = results.map(p => createProductCard(p)).join('');
+      }
+    }
+
+    // ============ Cart ============
+    function quickAdd(id) {
+      if (!isLoggedIn()) { openAuthModal('login'); return; }
+      const product = products.find(p => p.id === id);
+      const existing = cart.find(item => item.productId === id);
+      if (existing) { existing.qty += 1; } else { cart.push({ productId: id, ...product, qty: 1 }); }
+      updateCartBadge();
+      showToast(`เพิ่ม ${product.name} ลงตะกร้าแล้ว!`);
+    }
+
+    function updateCartBadge() {
+      const badge = document.getElementById('cartBadge');
+      const total = cart.reduce((sum, item) => sum + item.qty, 0);
+      badge.style.display = total > 0 ? 'flex' : 'none';
+      badge.textContent = total > 99 ? '99+' : total;
+    }
+
+    function openCart() {
+      renderCart();
+      document.getElementById('cartOverlay').classList.add('active');
+      document.getElementById('cartDrawer').classList.add('active');
+    }
+
+    function closeCart() {
+      document.getElementById('cartOverlay').classList.remove('active');
+      document.getElementById('cartDrawer').classList.remove('active');
+    }
+
+    function renderCart() {
+      const itemsEl = document.getElementById('cartItems');
+      const footer = document.getElementById('cartFooter');
+      if (cart.length === 0) {
+        itemsEl.innerHTML = '<div class="cart-empty"><span class="material-icons-round">shopping_cart</span><div class="cart-empty-text">ตะกร้าว่างเปล่า<br>ไปเลือกสินค้ากันเถอะ!</div></div>';
+        footer.style.display = 'none';
+        return;
+      }
+      footer.style.display = 'block';
+      itemsEl.innerHTML = cart.map((item, idx) => `
+        <div class="cart-item-wrapper" id="cartItem${idx}">
+          <div class="cart-item ${item.swiped ? 'swiped' : ''}" ontouchstart="handleSwipeStart(event, ${idx})" ontouchmove="handleSwipeMove(event, ${idx})" ontouchend="handleSwipeEnd(event, ${idx})">
+            <div class="cart-item-image" style="background:${getGradient(item.category)}">${item.image ? `<img src="${item.image}" alt="${item.name}" style="width:100%;height:100%;object-fit:contain;padding:8px;">` : item.emoji}</div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.name}</div>
+              <div class="cart-item-price">฿${item.price * item.qty}</div>
+              <div class="cart-item-controls">
+                <button class="qty-btn" onclick="changeCartQty(${idx}, -1)">−</button>
+                <span class="qty-value">${item.qty}</span>
+                <button class="qty-btn" onclick="changeCartQty(${idx}, 1)">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="swipe-actions"><button class="swipe-delete" onclick="removeFromCart(${idx})">ลบ</button></div>
+        </div>
+      `).join('');
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+      const discount = cart.reduce((sum, item) => sum + ((item.original || item.price) - item.price) * item.qty, 0);
+      document.getElementById('cartItemCount').textContent = totalItems;
+      document.getElementById('cartSubtotal').textContent = `฿${subtotal}`;
+      document.getElementById('cartDiscount').textContent = `-฿${discount}`;
+      document.getElementById('cartTotal').textContent = `฿${subtotal}`;
+    }
+
+    // Swipe to delete
+    let swipeStartX = 0;
+    function handleSwipeStart(e, idx) { swipeStartX = e.touches[0].clientX; }
+    function handleSwipeMove(e, idx) {
+      const diff = swipeStartX - e.touches[0].clientX;
+      if (diff > 0) {
+        const el = document.querySelector(`#cartItem${idx} .cart-item`);
+        el.style.transform = `translateX(-${Math.min(diff, 80)}px)`;
+      }
+    }
+    function handleSwipeEnd(e, idx) {
+      const diff = swipeStartX - e.changedTouches[0].clientX;
+      const el = document.querySelector(`#cartItem${idx} .cart-item`);
+      if (diff > 50) { el.style.transform = 'translateX(-80px)'; }
+      else { el.style.transform = 'translateX(0)'; }
+    }
+
+    function removeFromCart(idx) {
+      const item = cart[idx];
+      cart.splice(idx, 1);
+      updateCartBadge();
+      renderCart();
+      showToast(`ลบ ${item.name} ออกแล้ว`);
+    }
+
+    function changeCartQty(idx, delta) {
+      cart[idx].qty += delta;
+      if (cart[idx].qty <= 0) { cart.splice(idx, 1); }
+      updateCartBadge();
+      renderCart();
+    }
+
+    // ============ Product Modal ============
+    function openProductModal(id) {
+      if (!isLoggedIn()) { openAuthModal('login'); return; }
+      modalProduct = products.find(p => p.id === id);
+      modalQty = 1;
+      document.getElementById('modalImage').textContent = modalProduct.emoji;
+      const modalImg = document.getElementById('modalImage');
+      if (modalProduct.image) {
+        modalImg.innerHTML = `<img src="${modalProduct.image}" alt="${modalProduct.name}" style="width:100%;height:100%;object-fit:contain;padding:20px;">`;
+        modalImg.style.background = getGradient(modalProduct.category);
+      } else {
+        modalImg.textContent = modalProduct.emoji;
+        modalImg.style.background = getGradient(modalProduct.category);
+      }
+      document.getElementById('modalName').textContent = modalProduct.name;
+      document.getElementById('modalPrice').textContent = `฿${modalProduct.price}`;
+      document.getElementById('modalUnit').textContent = `ต่อ ${modalProduct.unit}`;
+      document.getElementById('modalDesc').textContent = modalProduct.desc;
+      document.getElementById('modalQty').textContent = '1';
+      document.getElementById('productOverlay').classList.add('active');
+      document.getElementById('productModal').classList.add('active');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productOverlay').classList.remove('active');
+      document.getElementById('productModal').classList.remove('active');
+      modalProduct = null;
+    }
+
+    function changeModalQty(delta) {
+      modalQty = Math.max(1, modalQty + delta);
+      document.getElementById('modalQty').textContent = modalQty;
+    }
+
+    function addFromModal() {
+      if (!modalProduct) return;
+      const existing = cart.find(item => item.productId === modalProduct.id);
+      if (existing) { existing.qty += modalQty; } else { cart.push({ productId: modalProduct.id, ...modalProduct, qty: modalQty }); }
+      updateCartBadge();
+      closeProductModal();
+      showToast(`เพิ่ม ${modalQty} ชิ้น ลงตะกร้าแล้ว!`);
+    }
+
+    // ============ Payment ============
+    async function goToPayment() {
+      if (!isLoggedIn()) { closeCart(); openAuthModal('login'); return; }
+      if (cart.length === 0) return;
+      closeCart();
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('payItemCount').textContent = totalItems;
+      document.getElementById('paySubtotal').textContent = `฿${subtotal.toLocaleString()}`;
+
+      // Fetch settings
+      try {
+        const res = await fetch(`${API}/settings`);
+        paymentSettings = await res.json();
+      } catch (e) {
+        paymentSettings = {};
+      }
+
+      // Update fee badges
+      if (paymentSettings.codFeePercent) document.getElementById('codFeeBadge').textContent = `+${paymentSettings.codFeePercent}%`;
+      if (paymentSettings.transferFeePercent) document.getElementById('transferFeeBadge').textContent = `+${paymentSettings.transferFeePercent}%`;
+      if (paymentSettings.qrFeePercent) document.getElementById('qrFeeBadge').textContent = `+${paymentSettings.qrFeePercent}%`;
+
+      // Update bank info
+      document.getElementById('bankNameDisplay').textContent = paymentSettings.bankName || 'ธนาคารกรุงไทย';
+      document.getElementById('bankAccountDisplay').textContent = paymentSettings.bankAccount || '854-3-10966-3';
+      document.getElementById('bankAccountNameDisplay').textContent = paymentSettings.bankAccountName || 'บริษัท สุขใจไอที จำกัด';
+      document.getElementById('qrCodeImg').src = (paymentSettings.qrCodeUrl || '/qr-payment.png');
+
+      // Reset delivery and payment
+      selectedDelivery = 'pickup';
+      selectedPayment = preferredPayment;
+      document.querySelectorAll('.delivery-option').forEach(o => o.classList.remove('selected'));
+      const delEl = document.querySelector('.delivery-option[data-delivery="pickup"]');
+      if (delEl) delEl.classList.add('selected');
+      document.getElementById('addressSection').style.display = 'none';
+      document.getElementById('deliveryAddress').value = '';
+
+      document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+      const payEl = document.querySelector(`.payment-option[data-method="${selectedPayment}"]`);
+      if (payEl) payEl.classList.add('selected');
+
+      recalcTotal(subtotal);
+
+      document.getElementById('paymentOverlay').classList.add('active');
+      document.getElementById('paymentModal').classList.add('active');
+    }
+
+    function recalcTotal(subtotal) {
+      let feePercent = 0;
+      if (selectedPayment === 'cod') feePercent = paymentSettings.codFeePercent || 10;
+      else if (selectedPayment === 'transfer') feePercent = paymentSettings.transferFeePercent || 3;
+      else if (selectedPayment === 'qrcode') feePercent = paymentSettings.qrFeePercent || 3;
+
+      const feeAmount = Math.round(subtotal * feePercent / 100);
+      const total = subtotal + feeAmount;
+
+      if (feeAmount > 0) {
+        document.getElementById('payFeeRow').style.display = 'flex';
+        document.getElementById('payFeePercent').textContent = `${feePercent}%`;
+        document.getElementById('payFeeAmount').textContent = `+฿${feeAmount.toLocaleString()}`;
+      } else {
+        document.getElementById('payFeeRow').style.display = 'none';
+      }
+      document.getElementById('payTotal').textContent = `฿${total.toLocaleString()}`;
+      return { total, feeAmount };
+    }
+
+    function closePaymentModal() {
+      document.getElementById('paymentOverlay').classList.remove('active');
+      document.getElementById('paymentModal').classList.remove('active');
+    }
+
+    function selectDelivery(el, method) {
+      document.querySelectorAll('.delivery-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedDelivery = method;
+      const addrSection = document.getElementById('addressSection');
+      const addrInput = document.getElementById('deliveryAddress');
+      if (method === 'delivery') {
+        addrSection.style.display = 'block';
+        loadSavedAddress();
+      } else {
+        addrSection.style.display = 'none';
+        addrInput.value = '';
+      }
+    }
+
+    function selectPayment(el, method) {
+      document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedPayment = method;
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      recalcTotal(subtotal);
+
+      // Show/hide bank info and QR
+      const bankInfo = document.getElementById('bankInfo');
+      const qrSection = document.getElementById('qrSection');
+      bankInfo.style.display = method === 'transfer' ? 'block' : 'none';
+      qrSection.style.display = method === 'qrcode' ? 'block' : 'none';
+    }
+
+    async function confirmPayment() {
+      const address = document.getElementById('deliveryAddress').value;
+      if (selectedDelivery === 'delivery' && !address) { showToast('กรุณากรอกที่อยู่จัดส่ง'); return; }
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const { total, feeAmount } = recalcTotal(subtotal);
+      const items = cart.map(item => ({ productId: item.productId, name: item.name, price: item.price, qty: item.qty, emoji: item.emoji }));
+
+      try {
+        const res = await fetch(`${API}/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ items, subtotal, feeAmount, total, paymentMethod: selectedPayment, deliveryMethod: selectedDelivery, address: address || '' })
+        });
+        const order = await res.json();
+
+        closePaymentModal();
+        document.getElementById('successOrderId').textContent = `Order #${order.id}`;
+        document.getElementById('successOverlay').classList.add('active');
+        document.getElementById('successModal').classList.add('active');
+
+        cart = [];
+        updateCartBadge();
+      } catch (e) {
+        showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
+      }
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('successOverlay').classList.remove('active');
+      document.getElementById('successModal').classList.remove('active');
+      showPage('home');
+    }
+
+    // ============ Auth ============
+    function openAuthModal(mode) {
+      authMode = mode;
+      document.getElementById('authTitle').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
+      document.getElementById('authSubmitBtn').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
+      document.getElementById('authSwitch').innerHTML = mode === 'login' ? 'ยังไม่มีบัญชี? <a onclick="toggleAuthMode()">สมัครสมาชิก</a>' : 'มีบัญชีอยู่แล้ว? <a onclick="toggleAuthMode()">เข้าสู่ระบบ</a>';
+      document.getElementById('nameGroup').style.display = mode === 'register' ? 'block' : 'none';
+      document.getElementById('authEmail').value = '';
+      document.getElementById('authPassword').value = '';
+      document.getElementById('authName').value = '';
+      document.getElementById('authOverlay').classList.add('active');
+      document.getElementById('authModal').classList.add('active');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authOverlay').classList.remove('active');
+      document.getElementById('authModal').classList.remove('active');
+    }
+
+    function toggleAuthMode() {
+      openAuthModal(authMode === 'login' ? 'register' : 'login');
+    }
+
+    async function handleAuth() {
+      const email = document.getElementById('authEmail').value;
+      const password = document.getElementById('authPassword').value;
+      const name = document.getElementById('authName').value;
+      
+      if (!email || !password) { showToast('กรุณากรอกอีเมลและรหัสผ่าน'); return; }
+      if (authMode === 'register' && !name) { showToast('กรุณากรอกชื่อ'); return; }
+      
+      const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
+      const body = authMode === 'login' ? { email, password } : { name, email, password };
+      
+      try {
+        const res = await fetch(`${API}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'เกิดข้อผิดพลาด'); return; }
+        
+        token = data.token;
+        user = data.user;
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        closeAuthModal();
+        updateUserUI();
+        showToast(`ยินดีต้อนรับ ${user.name}! 🎉`);
+      } catch (e) {
+        showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+      }
+    }
+
+    async function checkAuth() {
+      try {
+        const res = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          user = await res.json();
+          localStorage.setItem('user', JSON.stringify(user));
+          updateUserUI();
+        } else {
+          const saved = localStorage.getItem('user');
+          if (saved) { user = JSON.parse(saved); updateUserUI(); }
+          else logout();
+        }
+      } catch {
+        const saved = localStorage.getItem('user');
+        if (saved) { user = JSON.parse(saved); updateUserUI(); }
+        else logout();
+      }
+    }
+
+    function logout() {
+      token = null;
+      user = null;
+      localStorage.removeItem('token');
+      updateUserUI();
+      showToast('ออกจากระบบแล้ว');
+    }
+
+    function isLoggedIn() { return !!token; }
+
+    function updateUserUI() {
+      const loginBtn = document.getElementById('loginBtn');
+      const userAvatar = document.getElementById('userAvatar');
+      if (user) {
+        loginBtn.style.display = 'none';
+        userAvatar.style.display = 'flex';
+        userAvatar.textContent = user.name.charAt(0);
+        document.getElementById('profileAvatar').textContent = user.name.charAt(0);
+        document.getElementById('profileName').textContent = user.name;
+        document.getElementById('profileEmail').textContent = user.email;
+        loadOrderStats();
+      } else {
+        loginBtn.style.display = 'flex';
+        userAvatar.style.display = 'none';
+        document.getElementById('profileAvatar').textContent = '?';
+        document.getElementById('profileName').textContent = 'แขก';
+        document.getElementById('profileEmail').textContent = 'ยังไม่ได้เข้าสู่ระบบ';
+      }
+    }
+
+    async function loadOrderStats() {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API}/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          const orders = await res.json();
+          document.getElementById('statOrders').textContent = orders.length;
+          const spent = orders.filter(o => o.status === 'completed').reduce((sum, o) => sum + o.total, 0);
+          document.getElementById('statSpent').textContent = `฿${spent}`;
+        }
+      } catch {}
+    }
+
+    // ============ Orders Page ============
+    async function loadOrders() {
+      if (!token) return;
+      const content = document.getElementById('ordersContent');
+      try {
+        const res = await fetch(`${API}/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const orders = await res.json();
+        if (orders.length === 0) {
+          content.innerHTML = '<div style="text-align:center;padding:60px 20px;"><span class="material-icons-round" style="font-size:64px;color:var(--gray-300)">receipt_long</span><p style="margin-top:12px;color:var(--gray-500)">ยังไม่มีรายการสั่งซื้อ</p></div>';
+          return;
+        }
+        content.innerHTML = orders.map(o => `
+          <div class="order-card">
+            <div class="order-header">
+              <div><div class="order-id">Order #${o.id}</div><div class="order-date">${new Date(o.createdAt).toLocaleDateString('th-TH')}</div></div>
+              <div class="order-status ${o.status}">${getStatusText(o.status)}</div>
+            </div>
+            <div class="order-items">${o.items.map(item => `
+              <div class="order-item">
+                <span class="order-item-emoji">${item.image ? `<img src="${item.image}" style="width:32px;height:32px;object-fit:contain;">` : (item.emoji || '📦')}</span>
+                <div class="order-item-info"><div class="order-item-name">${item.name}</div><div class="order-item-qty">x${item.qty}</div></div>
+                <div class="order-item-price">฿${item.price * item.qty}</div>
+              </div>
+            `).join('')}</div>
+            <div class="order-footer"><span>รวม</span><span class="order-total">฿${o.total}</span></div>
+          </div>
+        `).join('');
+      } catch {
+        content.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-500);">ไม่สามารถโหลดข้อมูลได้</div>';
+      }
+    }
+
+    function getStatusText(status) {
+      const map = { pending: 'รอดำเนินการ', shipping: 'กำลังจัดส่ง', completed: 'สำเร็จ', cancelled: 'ยกเลิก' };
+      return map[status] || status;
+    }
+
+    // ============ Page Navigation ============
+    function showPage(pageId, btn) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(`page-${pageId}`).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (pageId === 'orders') loadOrders();
+    }
+
+    // ============ Utilities ============
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function startTimer() {
+      let h = 8, m = 45, s = 30;
+      setInterval(() => {
+        s--; if (s < 0) { s = 59; m--; }
+        if (m < 0) { m = 59; h--; }
+        if (h < 0) { h = 23; m = 59; s = 59; }
+        document.getElementById('timerH').textContent = String(h).padStart(2, '0');
+        document.getElementById('timerM').textContent = String(m).padStart(2, '0');
+        document.getElementById('timerS').textContent = String(s).padStart(2, '0');
+      }, 1000);
+    }
+
+    // ============ Profile Modals ============
+    function openProfileEdit() {
+      if (!isLoggedIn()) { openAuthModal('login'); return; }
+      document.getElementById('editProfileName').value = (user && user.name) ? user.name : '';
+      document.getElementById('editProfileEmail').value = (user && user.email) ? user.email : '';
+      document.getElementById('editProfileModal').style.display = 'flex';
+    }
+    function closeEditProfileModal() { document.getElementById('editProfileModal').style.display = 'none'; }
+    async function saveProfile() {
+      const name = document.getElementById('editProfileName').value.trim();
+      const email = document.getElementById('editProfileEmail').value.trim();
+      if (!name) { showToast('กรุณากรอกชื่อ'); return; }
+      if (!email) { showToast('กรุณากรอกอีเมล'); return; }
+      user = { ...(user || {}), name, email };
+      localStorage.setItem('user', JSON.stringify(user));
+      try { await fetch(`${API}/auth/profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ name, email }) }); } catch {}
+      updateUserUI();
+      closeEditProfileModal();
+      showToast('บันทึกโปรไฟล์แล้ว! 🎉');
+    }
+
+    function openAddressModal() {
+      if (!isLoggedIn()) { openAuthModal('login'); return; }
+      const saved = JSON.parse(localStorage.getItem('customerAddress') || '{}');
+      document.getElementById('addrHouse').value = saved.house || '';
+      document.getElementById('addrSoi').value = saved.soi || '';
+      document.getElementById('addrStreet').value = saved.street || '';
+      document.getElementById('addrSubdistrict').value = saved.subdistrict || '';
+      document.getElementById('addrDistrict').value = saved.district || '';
+      document.getElementById('addrProvince').value = saved.province || '';
+      document.getElementById('addrZip').value = saved.zip || '';
+      document.getElementById('addrPhone').value = saved.phone || '';
+      document.getElementById('addressModal').style.display = 'flex';
+    }
+    function closeAddressModal() { document.getElementById('addressModal').style.display = 'none'; }
+    function saveAddress() {
+      const house = document.getElementById('addrHouse').value.trim();
+      const province = document.getElementById('addrProvince').value.trim();
+      if (!house) { showToast('กรุณากรอกที่อยู่'); return; }
+      if (!province) { showToast('กรุณากรอกจังหวัด'); return; }
+      const addr = { house, soi: document.getElementById('addrSoi').value.trim(), street: document.getElementById('addrStreet').value.trim(), subdistrict: document.getElementById('addrSubdistrict').value.trim(), district: document.getElementById('addrDistrict').value.trim(), province, zip: document.getElementById('addrZip').value.trim(), phone: document.getElementById('addrPhone').value.trim() };
+      const parts = [addr.house, addr.soi, addr.street, addr.subdistrict, addr.district, addr.province, addr.zip].filter(Boolean);
+      localStorage.setItem('customerAddress', JSON.stringify(addr));
+      localStorage.setItem('deliveryAddress', parts.join(' '));
+      const payAddr = document.getElementById('deliveryAddress');
+      if (payAddr) payAddr.value = parts.join(' ');
+      closeAddressModal();
+      showToast('บันทึกที่อยู่แล้ว! 📍');
+    }
+    function loadSavedAddress() { const el = document.getElementById('deliveryAddress'); if (el) el.value = localStorage.getItem('deliveryAddress') || ''; }
+
+    let preferredPayment = localStorage.getItem('preferredPayment') || 'cod';
+    function openPaymentMethodModal() {
+      if (!isLoggedIn()) { openAuthModal('login'); return; }
+      document.querySelectorAll('.method-option').forEach(o => o.classList.remove('selected'));
+      const el = document.getElementById('pm-' + preferredPayment);
+      if (el) el.classList.add('selected');
+      document.getElementById('paymentMethodModal').style.display = 'flex';
+    }
+    function closePaymentMethodModal() { document.getElementById('paymentMethodModal').style.display = 'none'; }
+    function selectMethod(method, elId) { preferredPayment = method; document.querySelectorAll('.method-option').forEach(o => o.classList.remove('selected')); document.getElementById(elId).classList.add('selected'); }
+    function savePaymentMethod() {
+      localStorage.setItem('preferredPayment', preferredPayment);
+      selectedPayment = preferredPayment;
+      document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+      const payEl = document.querySelector(`.payment-option[data-method="${preferredPayment}"]`);
+      if (payEl) payEl.classList.add('selected');
+      closePaymentMethodModal();
+      showToast('บันทึกวิธีชำระเงินแล้ว! 💳');
+    }
+
+    init();
+  </script>
+</body>
+</html>
