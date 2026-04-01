@@ -1,7 +1,4 @@
 db.json
-db.json.backup_before_sync
-db.json.new
-db.json.valid
 node_modules/
 *.log
 .env
@@ -11,11 +8,11 @@ backup/
 temp/
 *.bak
 *.backup
-images/*.png
-images/*.jpg
-images/*.jpeg
-images/*.gif
-images/*.webp
-!images/shop-logo.png
-!images/shop-logo-full.png
-!images/qr-payment.png
+public/images/*.png
+public/images/*.jpg
+public/images/*.jpeg
+public/images/*.gif
+public/images/*.webp
+!public/images/qr-payment.png
+!public/images/shop-logo.png
+!public/images/shop-logo-full.png
