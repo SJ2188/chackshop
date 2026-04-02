@@ -157,6 +157,22 @@ app.post('/api/auth/login', (req, res) => {
   });
 });
 
+app.post('/api/auth/register', async (req, res) => {
+  const { name, email, password, phone } = req.body;
+  if (!name || !email || !password) return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบ' });
+  
+  // Check if email already exists
+  const existing = await usersCol.findOne({ email });
+  if (existing) return res.status(400).json({ error: 'อีเมลนี้ถูกใช้งานแล้ว' });
+  
+  const id = await getNextId(usersCol);
+  const user = { id, name, email, password, phone: phone || '', isAdmin: false };
+  await usersCol.insertOne(user);
+  
+  const token = Buffer.from(JSON.stringify({ id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin })).toString('base64');
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin } });
+});
+
 app.get('/api/auth/me', authMiddleware, (req, res) => res.json(req.user));
 
 // ============ Products API ============
