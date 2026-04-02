@@ -310,10 +310,10 @@
       </div>
     </header>
     <div class="content">
-      <div class="promo-banner" onclick="showToast('โปรโมชั่นพิเศษ! สั่งวันนี้ส่งฟรี! 🎉')">
-        <div class="promo-badge">🎉 มาใหม่!</div>
-        <div class="promo-title">สั่งวันนี้<br>ส่งฟรี!</div>
-        <div class="promo-subtitle">รายการแรก ส่งฟรีไม่มีขั้นต่ำ</div>
+      <div class="promo-banner" id="promoBanner" onclick="showToast('โปรโมชั่นพิเศษ!')">
+        <div class="promo-badge" id="promoBadge">🎉 มาใหม่!</div>
+        <div class="promo-title" id="promoTitle">สั่งวันนี้<br>ส่งฟรี!</div>
+        <div class="promo-subtitle" id="promoSubtitle">รายการแรก ส่งฟรีไม่มีขั้นต่ำ</div>
       </div>
       <div class="section" style="margin-bottom:8px;">
         <div class="quick-tags" id="quickTags">
@@ -616,9 +616,27 @@
 
     // ============ Init ============
     async function init() {
+      await loadPromo();
       await loadProducts();
       if (token) await checkAuth();
       startTimer();
+    }
+
+    async function loadPromo() {
+      try {
+        const res = await fetch(`${API}/promo`);
+        if (!res.ok) return;
+        const promo = await res.json();
+        if (!promo.enabled) {
+          document.getElementById('promoBanner').style.display = 'none';
+          return;
+        }
+        document.getElementById('promoBadge').textContent = promo.badge;
+        document.getElementById('promoTitle').innerHTML = promo.title.replace(/\n/g, '<br>');
+        document.getElementById('promoSubtitle').textContent = promo.subtitle;
+      } catch (e) {
+        // Silently fail, keep default values
+      }
     }
 
     async function loadProducts() {

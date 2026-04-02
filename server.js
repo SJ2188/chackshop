@@ -14,7 +14,7 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
 const DB_NAME = process.env.DB_NAME || 'chackshop';
 
 let db;
-let productsCol, usersCol, ordersCol, settingsCol;
+let productsCol, usersCol, ordersCol, settingsCol, flashSaleCol;
 
 // ============ MongoDB Connect ============
 async function connectDB() {
@@ -29,6 +29,7 @@ async function connectDB() {
     usersCol = db.collection('users');
     ordersCol = db.collection('orders');
     settingsCol = db.collection('settings');
+    flashSaleCol = db.collection('flashsale');
 
     // Ensure indexes
     await productsCol.createIndex({ id: 1 }, { unique: true });
@@ -76,7 +77,20 @@ async function seedDefaultData() {
       bankAccount: '854-3-10966-3',
       bankAccountName: 'บริษัท สุขใจไอที จำกัด',
       qrCodeUrl: '/qr-payment.png',
+      promoBadge: '🎉 มาใหม่!',
+      promoTitle: 'สั่งวันนี้\nส่งฟรี!',
+      promoSubtitle: 'รายการแรก ส่งฟรีไม่มีขั้นต่ำ',
+      promoEnabled: true,
     });
+  }
+
+  // Seed flash sale from products with discount > 0
+  const flashCount = await flashSaleCol.countDocuments({});
+  if (flashCount === 0) {
+    const saleProducts = await productsCol.find({ discount: { $gt: 0 } }).limit(20).toArray();
+    if (saleProducts.length > 0) {
+      await flashSaleCol.insertMany(saleProducts.map(p => ({ productId: p.id, discount: p.discount || 0, endsAt: null })));
+    }
   }
 }
 
@@ -352,18 +366,49 @@ app.get('/api/settings', async (req, res) => {
 
 app.put('/api/settings', authMiddleware, async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
-  const { codFeePercent, transferFeePercent, qrFeePercent, bankName, bankAccount, bankAccountName, qrCodeUrl } = req.body;
+  const { codFeePercent, transferFeePercent, qrFeePercent, bankName, bankAccount, bankAccountName, qrCodeUrl, promoBadge, promoTitle, promoSubtitle, promoEnabled } = req.body;
   await settingsCol.updateOne({}, {
     $set: {
       ...(codFeePercent !== undefined && { codFeePercent: parseFloat(codFeePercent) }),
       ...(transferFeePercent !== undefined && { transferFeePercent: parseFloat(transferFeePercent) }),
       ...(qrFeePercent !== undefined && { qrFeePercent: parseFloat(qrFeePercent) }),
-      ...(bankName && { bankName }), ...(bankAccount && { bankAccount }),
-      ...(bankAccountName && { bankAccountName }), ...(qrCodeUrl && { qrCodeUrl }),
+      ...(bankName !== undefined && { bankName }), ...(bankAccount !== undefined && { bankAccount }),
+      ...(bankAccountName !== undefined && { bankAccountName }), ...(qrCodeUrl !== undefined && { qrCodeUrl }),
+      ...(promoBadge !== undefined && { promoBadge }),
+      ...(promoTitle !== undefined && { promoTitle }),
+      ...(promoSubtitle !== undefined && { promoSubtitle }),
+      ...(promoEnabled !== undefined && { promoEnabled }),
     }
   }, { upsert: true });
   const updated = await settingsCol.findOne({});
   res.json(updated);
+});
+
+app.get('/api/flash-sale', async (req, res) => {
+  try {
+    // Get flash sale product IDs
+    const flashItems = await flashSaleCol.find({}).toArray();
+    if (!flashItems.length) {
+      // Fallback: products with discount
+      const products = await productsCol.find({ discount: { $gt: 0 } }).limit(8).toArray();
+      return res.json(products);
+    }
+    const productIds = flashItems.map(f => f.productId);
+    const products = await productsCol.find({ id: { $in: productIds } }).toArray();
+    res.json(products);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/promo', async (req, res) => {
+  const settings = await settingsCol.findOne({}) || {};
+  res.json({
+    badge: settings.promoBadge || '🎉 มาใหม่!',
+    title: settings.promoTitle || 'สั่งวันนี้\nส่งฟรี!',
+    subtitle: settings.promoSubtitle || 'รายการแรก ส่งฟรีไม่มีขั้นต่ำ',
+    enabled: settings.promoEnabled !== false,
+  });
 });
 
 // ============ Image Upload ============
