@@ -264,7 +264,7 @@
           <h2>บัญชีลูกค้า</h2>
         </div>
         <div class="card">
-          <table class="table"><thead><tr><th>ลูกค้า</th><th>อีเมล</th><th>โทรศัพท์</th><th>สมัครเมื่อ</th><th>จัดการ</th></tr></thead><tbody id="customersTable"></tbody></table>
+          <table class="table"><thead><tr><th>ลูกค้า</th><th>อีเมล</th><th>โทรศัพท์</th><th>ที่อยู่</th><th>สมัครเมื่อ</th><th>จัดการ</th></tr></thead><tbody id="customersTable"></tbody></table>
         </div>
       </div>
 
@@ -357,8 +357,14 @@
           <div style="padding:16px;">
             <div class="form-group">
               <label class="form-label">URL รูป QR Code</label>
-              <input type="text" class="form-input" id="settingQrCodeUrl" placeholder="/qr-payment.png หรือ https://...">
-              <small style="color:#6C757D;font-size:11px;">ใส่ URL ของรูป QR Code ที่อัปโหลดไว้</small>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input type="text" class="form-input" id="settingQrCodeUrl" placeholder="/qr-payment.png หรือ https://..." style="flex:1;">
+                <label class="btn btn-secondary" style="cursor:pointer;white-space:nowrap;padding:10px 14px;border-radius:8px;font-size:13px;background:#6C757D;color:white;border:none;">
+                  📤 อัปโหลด
+                  <input type="file" accept="image/*" style="display:none;" id="qrUploadInput" onchange="handleQrUpload(this)">
+                </label>
+              </div>
+              <small style="color:#6C757D;font-size:11px;">อัปโหลดรูป QR → เก็บใน Cloudinary (ไม่หายเมื่อ redeploy)</small>
             </div>
             <div id="qrPreview" style="margin-top:12px;text-align:center;">
               <img id="qrPreviewImg" src="" alt="QR Preview" style="max-width:200px;border-radius:12px;border:2px solid #E9ECEF;display:none;">
@@ -677,11 +683,17 @@
       tbody.innerHTML = customers.map(c => `
         <tr>
           <td>
-            <div style="font-weight:600;">${c.name}</div>
-            ${c.isAdmin ? '<span style="background:#FF6B00;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">ADMIN</span>' : ''}
+            <div style="display:flex;align-items:center;gap:10px;">
+              ${c.avatar ? `<img src="${c.avatar}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--gray-200);">` : `<div style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">${c.name ? c.name.charAt(0) : '?'}</div>`}
+              <div>
+                <div style="font-weight:600;">${c.name}</div>
+                ${c.isAdmin ? '<span style="background:#FF6B00;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">ADMIN</span>' : ''}
+              </div>
+            </div>
           </td>
           <td>${c.email}</td>
           <td>${c.phone || '-'}</td>
+          <td><div style="font-size:12px;color:var(--gray-600);">${c.address || '<span style="color:var(--gray-400);">ยังไม่มีที่อยู่</span>'}</div></td>
           <td>${c.createdAt ? new Date(c.createdAt).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="editCustomer(${c.id})">แก้ไข</button>
@@ -1151,6 +1163,29 @@
         if (this.value) { img.src = this.value; img.style.display = 'block'; }
         else img.style.display = 'none';
       });
+    }
+
+    async function handleQrUpload(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('qr', file);
+      try {
+        input.disabled = true;
+        input.parentElement.style.opacity = '0.6';
+        const res = await fetch(`${API}/upload/qr`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('settingQrCodeUrl').value = data.url;
+          const img = document.getElementById('qrPreviewImg');
+          img.src = data.url;
+          img.style.display = 'block';
+          showToast('อัปโหลด QR Code สำเร็จ! ✅');
+        } else {
+          showToast('อัปโหลดล้มเหลว');
+        }
+      } catch { showToast('เกิดข้อผิดพลาด'); }
+      finally { input.disabled = false; input.parentElement.style.opacity = '1'; }
     }
 
     async function saveSettings() {

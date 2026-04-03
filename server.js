@@ -5,6 +5,7 @@ const https = require('https');
 const http = require('http');
 const { MongoClient, ObjectId } = require('mongodb');
 const fileUpload = require('express-fileupload');
+const cloudinary = require('cloudinary').v2;
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -12,6 +13,13 @@ const PORT = process.env.PORT || 3002;
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017';
 const DB_NAME = process.env.DB_NAME || 'chackshop';
+
+// Cloudinary Config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dyepwdcvq',
+  api_key: process.env.CLOUDINARY_API_KEY || '362778118266825',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'k9Y-9kUocRxhmhcVYA8c7Nlf12s',
+});
 
 let db;
 let productsCol, usersCol, ordersCol, settingsCol, flashSaleCol;
@@ -202,6 +210,15 @@ app.get('/api/products/:id', async (req, res) => {
   product ? res.json(product) : res.status(404).json({ error: 'Not found' });
 });
 
+// ============ Flash Sale API (per-product flag) ============
+app.put('/api/products/:id/flashsale', authMiddleware, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
+  const { flashSale } = req.body;
+  await productsCol.updateOne({ id: parseInt(req.params.id) }, { $set: { flashSale } });
+  const updated = await productsCol.findOne({ id: parseInt(req.params.id) });
+  res.json(updated);
+});
+
 app.put('/api/products/:id', authMiddleware, async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
   const { id } = req.params;
@@ -322,12 +339,14 @@ app.get('/api/users', authMiddleware, async (req, res) => {
 
 app.put('/api/users/:id', authMiddleware, async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password, address, avatar } = req.body;
   const update = {};
-  if (name) update.name = name;
-  if (email) update.email = email;
+  if (name !== undefined) update.name = name;
+  if (email !== undefined) update.email = email;
   if (phone !== undefined) update.phone = phone;
   if (password) update.password = password;
+  if (address !== undefined) update.address = address;
+  if (avatar !== undefined) update.avatar = avatar;
   await usersCol.updateOne({ id: parseInt(req.params.id) }, { $set: update });
   const updated = await usersCol.findOne({ id: parseInt(req.params.id) }, { projection: { password: 0 } });
   res.json(updated);
@@ -337,6 +356,24 @@ app.delete('/api/users/:id', authMiddleware, async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
   await usersCol.deleteOne({ id: parseInt(req.params.id) });
   res.json({ success: true });
+});
+
+// User self-profile update (not admin)
+app.put('/api/users/:id/profile', authMiddleware, async (req, res) => {
+  if (req.user.id !== parseInt(req.params.id) && !req.user.isAdmin) {
+    return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
+  }
+  const { name, email, password, address, phone, avatar } = req.body;
+  const update = {};
+  if (name !== undefined) update.name = name;
+  if (email !== undefined) update.email = email;
+  if (password !== undefined) update.password = password;
+  if (phone !== undefined) update.phone = phone;
+  if (address !== undefined) update.address = address;
+  if (avatar !== undefined) update.avatar = avatar;
+  await usersCol.updateOne({ id: parseInt(req.params.id) }, { $set: update });
+  const updated = await usersCol.findOne({ id: parseInt(req.params.id) }, { projection: { password: 0 } });
+  res.json(updated);
 });
 
 // ============ Stats API ============
@@ -411,22 +448,67 @@ app.get('/api/promo', async (req, res) => {
   });
 });
 
-// ============ Image Upload ============
-const fs = require('fs');
-const imagesDir = path.join(__dirname, 'public', 'images');
-if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
-
+// ============ Image Upload (Cloudinary) ============
 app.post('/api/upload', authMiddleware, async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
   if (!req.files || !req.files.image) return res.status(400).json({ error: 'ไม่พบไฟล์' });
   const file = req.files.image;
-  const ext = path.extname(file.name).toLowerCase();
-  const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-  if (!allowed.includes(ext)) return res.status(400).json({ error: 'รองรับเฉพาะไฟล์รูปภาพ' });
-  const filename = `product_${Date.now()}${ext}`;
-  const filepath = path.join(imagesDir, filename);
-  await file.mv(filepath);
-  res.json({ url: `/images/${filename}` });
+  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowed.includes(file.mimetype)) return res.status(400).json({ error: 'รองรับเฉพาะไฟล์รูปภาพ' });
+  try {
+    const b64 = file.data.toString('base64');
+    const dataUri = `data:${file.mimetype};base64,${b64}`;
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder: 'chackshop/products',
+      public_id: `product_${Date.now()}`,
+    });
+    res.json({ url: result.secure_url });
+  } catch (e) {
+    res.status(500).json({ error: 'อัปโหลดรูปล้มเหลว: ' + e.message });
+  }
+});
+
+// ============ User Avatar Upload (Cloudinary) ============
+app.post('/api/upload/avatar', authMiddleware, async (req, res) => {
+  if (!req.files || !req.files.avatar) return res.status(400).json({ error: 'ไม่พบไฟล์' });
+  const file = req.files.avatar;
+  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowed.includes(file.mimetype)) return res.status(400).json({ error: 'รองรับเฉพาะไฟล์รูปภาพ' });
+  try {
+    const b64 = file.data.toString('base64');
+    const dataUri = `data:${file.mimetype};base64,${b64}`;
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder: 'chackshop/avatars',
+      public_id: `user_${req.user.id}_${Date.now()}`,
+    });
+    const url = result.secure_url;
+    await usersCol.updateOne({ id: req.user.id }, { $set: { avatar: url } });
+    res.json({ url });
+  } catch (e) {
+    res.status(500).json({ error: 'อัปโหลดรูปล้มเหลว: ' + e.message });
+  }
+});
+
+// ============ QR Code Upload (Cloudinary) ============
+app.post('/api/upload/qr', authMiddleware, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
+  if (!req.files || !req.files.qr) return res.status(400).json({ error: 'ไม่พบไฟล์' });
+  const file = req.files.qr;
+  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowed.includes(file.mimetype)) return res.status(400).json({ error: 'รองรับเฉพาะไฟล์รูปภาพ' });
+  try {
+    const b64 = file.data.toString('base64');
+    const dataUri = `data:${file.mimetype};base64,${b64}`;
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder: 'chackshop/qr',
+      public_id: `qr_payment_${Date.now()}`,
+    });
+    // Auto-update settings
+    await settingsCol.updateOne({}, { $set: { qrCodeUrl: result.secure_url } }, { upsert: true });
+    res.json({ url: result.secure_url });
+  } catch (e) {
+    res.status(500).json({ error: 'อัปโหลด QR Code ล้มเหลว: ' + e.message });
+  }
 });
 
 // ============ Config ============

@@ -114,6 +114,11 @@
     .flash-sale { background: linear-gradient(135deg, #FF3D00 0%, #FF6B00 100%); border-radius: var(--radius-lg); padding: 16px; color: white; margin: 0 16px 16px; }
     .flash-sale-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .flash-sale-title { font-size: 16px; font-weight: 700; }
+    /* Products page */
+    .page-products .header { padding: 12px 16px 0; }
+    .page-products .content { padding-top: 8px; }
+    .page-products .search-bar { margin: 8px 0; }
+    .page-products .quick-tags { padding: 0; }
     .timer-box { background: white; color: var(--danger); font-size: 13px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
     .timer-sep { font-weight: 700; }
 
@@ -343,6 +348,32 @@
   </div>
 
   <!-- Orders Page -->
+  <!-- Products Page -->
+  <div class="page" id="page-products">
+    <header class="header">
+      <div class="header-top">
+        <div class="logo">สินค้าทั้งหมด</div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="openCart()">
+            <span class="material-icons-round">shopping_cart</span>
+            <span class="badge" id="cartBadge2" style="display:none">0</span>
+          </button>
+        </div>
+      </div>
+      <div class="search-bar">
+        <span class="material-icons-round">search</span>
+        <input type="text" placeholder="ค้นหาสินค้า..." id="productsSearchInput" oninput="filterProductsPage(this.value)">
+      </div>
+      <div class="quick-tags" id="productsQuickTags" style="padding:8px 16px;overflow-x:auto;white-space:nowrap;">
+      </div>
+    </header>
+    <div class="content">
+      <div class="products-grid" id="productsPageGrid" style="padding-top:8px;">
+        <div class="loading"><div class="spinner"></div><div class="loading-text">กำลังโหลดสินค้า...</div></div>
+      </div>
+    </div>
+  </div>
+
   <div class="page" id="page-orders">
     <header class="header">
       <div class="header-top">
@@ -396,6 +427,7 @@
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <button class="nav-item active" onclick="showPage('home', this)"><span class="material-icons-round">home</span><span>หน้าแรก</span></button>
+    <button class="nav-item" onclick="showPage('products', this)"><span class="material-icons-round">storefront</span><span>สินค้า</span></button>
     <button class="nav-item" onclick="if(!isLoggedIn()){openAuthModal('login');return;} showPage('orders', this)"><span class="material-icons-round">receipt_long</span><span>ออเดอร์</span></button>
     <button class="nav-item" onclick="openCart()"><span class="material-icons-round">shopping_cart</span><span>ตะกร้า</span></button>
     <button class="nav-item" onclick="showPage('profile', this)"><span class="material-icons-round">person</span><span>โปรไฟล์</span></button>
@@ -557,8 +589,21 @@
     <div class="modal-content">
       <div class="modal-handle"></div>
       <div class="modal-title">✏️ แก้ไขโปรไฟล์</div>
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="position:relative;display:inline-block;">
+          <div id="editAvatarPreview" style="width:72px;height:72px;border-radius:50%;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:var(--gray-500);margin:0 auto;overflow:hidden;">
+            <span id="editAvatarInitial">T</span>
+          </div>
+          <label style="position:absolute;bottom:0;right:0;background:var(--primary);color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+            <span class="material-icons-round" style="font-size:16px;">camera_alt</span>
+            <input type="file" accept="image/*" style="display:none;" id="editAvatarInput" onchange="handleAvatarPreview(this)">
+          </label>
+        </div>
+        <div style="font-size:12px;color:var(--gray-500);margin-top:6px;">แตะไอคอนกล้องเพื่อเปลี่ยนรูป</div>
+      </div>
       <div class="form-group"><label class="form-label">ชื่อ</label><input type="text" class="form-input" id="editProfileName" placeholder="ชื่อของคุณ"></div>
       <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="editProfileEmail" placeholder="ton@email.com"></div>
+      <div class="form-group"><label class="form-label">เปลี่ยนรหัสผ่าน (ไม่บังคับ)</label><input type="password" class="form-input" id="editProfilePassword" placeholder="รหัสผ่านใหม่"></div>
       <button class="save-btn" onclick="saveProfile()">💾 บันทึก</button>
       <button class="cancel-btn" onclick="closeEditProfileModal()">ยกเลิก</button>
     </div>
@@ -761,6 +806,36 @@
       const tags = document.querySelectorAll('.quick-tag');
       tags.forEach(t => { if (t.textContent.includes(cat) || t.textContent === 'ทั้งหมด') t.classList.add('active'); });
       renderProducts(cat);
+    }
+
+    // ============ Products Page ============
+    let productsPageCat = 'all';
+    function renderProductsPage() {
+      const cats = [...new Set(products.map(p => p.category))];
+      const quickTags = document.getElementById('productsQuickTags');
+      quickTags.innerHTML = `<button class="quick-tag ${productsPageCat === 'all' ? 'active' : ''}" onclick="filterProductsPageByCat(this, 'all')">ทั้งหมด</button>` +
+        cats.map(c => `<button class="quick-tag ${productsPageCat === c ? 'active' : ''}" onclick="filterProductsPageByCat(this, '${c.replace(/'/g,"\\'")}')">${c}</button>`).join('');
+      filterProductsPage(document.getElementById('productsSearchInput') ? document.getElementById('productsSearchInput').value : '');
+    }
+    function filterProductsPageByCat(btn, cat) {
+      productsPageCat = cat;
+      document.querySelectorAll('#productsQuickTags .quick-tag').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      filterProductsPage(document.getElementById('productsSearchInput') ? document.getElementById('productsSearchInput').value : '');
+    }
+    function filterProductsPage(query) {
+      const grid = document.getElementById('productsPageGrid');
+      let filtered = productsPageCat === 'all' ? products : products.filter(p => p.category === productsPageCat);
+      if (query) {
+        const q = query.toLowerCase();
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || (p.unit && p.unit.toLowerCase().includes(q)));
+      }
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--gray-400);"><span class="material-icons-round" style="font-size:56px;">search_off</span><p style="margin-top:12px;font-size:16px;font-weight:600;">ไม่พบสินค้าที่ค้นหา</p></div>';
+        return;
+      }
+      grid.innerHTML = filtered.map(p => createProductCard(p)).join('');
+      updateCartBadge();
     }
 
     function handleSearch(query) {
@@ -1139,8 +1214,17 @@
       if (user) {
         loginBtn.style.display = 'none';
         userAvatar.style.display = 'flex';
-        userAvatar.textContent = user.name.charAt(0);
-        document.getElementById('profileAvatar').textContent = user.name.charAt(0);
+        if (user.avatar) {
+          userAvatar.innerHTML = `<img src="${user.avatar}" style="width:36px;height:36px;object-fit:cover;border-radius:50%;">`;
+        } else {
+          userAvatar.textContent = user.name.charAt(0);
+        }
+        const profileAvatar = document.getElementById('profileAvatar');
+        if (user.avatar) {
+          profileAvatar.innerHTML = `<img src="${user.avatar}" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,0.5);">`;
+        } else {
+          profileAvatar.textContent = user.name.charAt(0);
+        }
         document.getElementById('profileName').textContent = user.name;
         document.getElementById('profileEmail').textContent = user.email;
         loadOrderStats();
@@ -1211,6 +1295,7 @@
       if (btn) btn.classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (pageId === 'orders') loadOrders();
+      if (pageId === 'products') renderProductsPage();
     }
 
     // ============ Utilities ============
@@ -1238,17 +1323,62 @@
       if (!isLoggedIn()) { openAuthModal('login'); return; }
       document.getElementById('editProfileName').value = (user && user.name) ? user.name : '';
       document.getElementById('editProfileEmail').value = (user && user.email) ? user.email : '';
+      document.getElementById('editProfilePassword').value = '';
+      // Avatar preview
+      const preview = document.getElementById('editAvatarPreview');
+      const initial = document.getElementById('editAvatarInitial');
+      if (user && user.avatar) {
+        preview.innerHTML = `<img src="${user.avatar}" style="width:72px;height:72px;object-fit:cover;border-radius:50%;">`;
+      } else {
+        preview.innerHTML = `<span id="editAvatarInitial">${(user && user.name) ? user.name.charAt(0) : 'T'}</span>`;
+      }
       document.getElementById('editProfileModal').style.display = 'flex';
     }
     function closeEditProfileModal() { document.getElementById('editProfileModal').style.display = 'none'; }
+    function handleAvatarPreview(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('editAvatarPreview');
+          preview.innerHTML = `<img src="${e.target.result}" style="width:72px;height:72px;object-fit:cover;border-radius:50%;">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
     async function saveProfile() {
       const name = document.getElementById('editProfileName').value.trim();
       const email = document.getElementById('editProfileEmail').value.trim();
+      const password = document.getElementById('editProfilePassword').value.trim();
       if (!name) { showToast('กรุณากรอกชื่อ'); return; }
       if (!email) { showToast('กรุณากรอกอีเมล'); return; }
-      user = { ...(user || {}), name, email };
+
+      const payload = { name, email };
+      if (password) payload.password = password;
+
+      // Upload avatar if selected
+      const avatarInput = document.getElementById('editAvatarInput');
+      if (avatarInput.files && avatarInput.files[0]) {
+        const formData = new FormData();
+        formData.append('avatar', avatarInput.files[0]);
+        try {
+          const upRes = await fetch(`${API}/upload/avatar`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+          if (upRes.ok) {
+            const upData = await upRes.json();
+            payload.avatar = upData.url;
+          }
+        } catch {}
+      }
+
+      // Update local
+      user = { ...(user || {}), ...payload };
+      if (payload.avatar) user.avatar = payload.avatar;
+      delete user.password;
       localStorage.setItem('user', JSON.stringify(user));
-      try { await fetch(`${API}/auth/profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ name, email }) }); } catch {}
+
+      // Update server
+      try {
+        await fetch(`${API}/users/${user.id}/profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
+      } catch {}
       updateUserUI();
       closeEditProfileModal();
       showToast('บันทึกโปรไฟล์แล้ว! 🎉');
@@ -1268,17 +1398,23 @@
       document.getElementById('addressModal').style.display = 'flex';
     }
     function closeAddressModal() { document.getElementById('addressModal').style.display = 'none'; }
-    function saveAddress() {
+    async function saveAddress() {
       const house = document.getElementById('addrHouse').value.trim();
       const province = document.getElementById('addrProvince').value.trim();
       if (!house) { showToast('กรุณากรอกที่อยู่'); return; }
       if (!province) { showToast('กรุณากรอกจังหวัด'); return; }
       const addr = { house, soi: document.getElementById('addrSoi').value.trim(), street: document.getElementById('addrStreet').value.trim(), subdistrict: document.getElementById('addrSubdistrict').value.trim(), district: document.getElementById('addrDistrict').value.trim(), province, zip: document.getElementById('addrZip').value.trim(), phone: document.getElementById('addrPhone').value.trim() };
-      const parts = [addr.house, addr.soi, addr.street, addr.subdistrict, addr.district, addr.province, addr.zip].filter(Boolean);
+      const fullAddress = [addr.house, addr.soi, addr.street, addr.subdistrict, addr.district, addr.province, addr.zip].filter(Boolean).join(' ');
       localStorage.setItem('customerAddress', JSON.stringify(addr));
-      localStorage.setItem('deliveryAddress', parts.join(' '));
+      localStorage.setItem('deliveryAddress', fullAddress);
       const payAddr = document.getElementById('deliveryAddress');
-      if (payAddr) payAddr.value = parts.join(' ');
+      if (payAddr) payAddr.value = fullAddress;
+      // Save to server DB
+      if (token && user) {
+        try {
+          await fetch(`${API}/users/${user.id}/profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ address: fullAddress }) });
+        } catch {}
+      }
       closeAddressModal();
       showToast('บันทึกที่อยู่แล้ว! 📍');
     }
