@@ -12,11 +12,15 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: DB_NAME
+        sync: false
       - key: MONGO_URI
         sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
       - key: LINE_NOTIFY_TOKEN
-        sync: false
-      - key: LINE_PAY_CHANNEL_ID
-        sync: false
-      - key: LINE_PAY_CHANNEL_SECRET
         sync: false

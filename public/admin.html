@@ -234,13 +234,16 @@
         </div>
 
         <!-- Order Tabs -->
-        <div style="padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;background:#F8F9FA;border-bottom:1px solid #E9ECEF;">
+        <div style="padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;background:#F8F9FA;border-bottom:1px solid #E9ECEF;align-items:center;">
           <button class="btn btn-sm order-tab active" data-filter="all" onclick="filterOrdersTab('all', this)" style="background:#FF6B00;color:white;border:none;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">ทั้งหมด <span id="tabCountAll">0</span></button>
           <button class="btn btn-sm order-tab" data-filter="pending" onclick="filterOrdersTab('pending', this)" style="background:white;color:#E65100;border:1.5px solid #E65100;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">⏳ รอดำเนินการ <span id="tabCountPending">0</span></button>
           <button class="btn btn-sm order-tab" data-filter="shipping" onclick="filterOrdersTab('shipping', this)" style="background:white;color:#1565C0;border:1.5px solid #1565C0;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">🚚 กำลังจัดส่ง <span id="tabCountShipping">0</span></button>
           <button class="btn btn-sm order-tab" data-filter="completed" onclick="filterOrdersTab('completed', this)" style="background:white;color:#2E7D32;border:1.5px solid #2E7D32;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">✅ สำเร็จ <span id="tabCountCompleted">0</span></button>
           <button class="btn btn-sm order-tab" data-filter="cancelled" onclick="filterOrdersTab('cancelled', this)" style="background:white;color:#9E9E9E;border:1.5px solid #9E9E9E;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">❌ ยกเลิก <span id="tabCountCancelled">0</span></button>
           <button class="btn btn-sm order-tab" data-filter="pending-items" onclick="filterOrdersTab('pending-items', this)" style="background:#FFF3E0;color:#BF360C;border:1.5px solid #BF360C;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">📋 สินค้ารอดำเนินการ <span id="tabCountPendingItems">0</span></button>
+          <div style="margin-left:auto;">
+            <input type="text" id="orderSearchInput" placeholder="🔍 ค้นหาออเดอร์..." oninput="renderOrdersTable()" style="border:1.5px solid #dee2e6;border-radius:20px;padding:6px 14px;font-size:13px;outline:none;min-width:200px;">
+          </div>
         </div>
 
         <!-- Orders Table -->
@@ -264,7 +267,7 @@
           <h2>บัญชีลูกค้า</h2>
         </div>
         <div class="card">
-          <table class="table"><thead><tr><th>ลูกค้า</th><th>อีเมล</th><th>โทรศัพท์</th><th>ที่อยู่</th><th>สมัครเมื่อ</th><th>จัดการ</th></tr></thead><tbody id="customersTable"></tbody></table>
+          <table class="table"><thead><tr><th>ลูกค้า</th><th>อีเมล</th><th>โทรศัพท์</th><th>สมัครเมื่อ</th><th>จัดการ</th></tr></thead><tbody id="customersTable"></tbody></table>
         </div>
       </div>
 
@@ -357,18 +360,35 @@
           <div style="padding:16px;">
             <div class="form-group">
               <label class="form-label">URL รูป QR Code</label>
-              <div style="display:flex;gap:8px;align-items:center;">
-                <input type="text" class="form-input" id="settingQrCodeUrl" placeholder="/qr-payment.png หรือ https://..." style="flex:1;">
-                <label class="btn btn-secondary" style="cursor:pointer;white-space:nowrap;padding:10px 14px;border-radius:8px;font-size:13px;background:#6C757D;color:white;border:none;">
-                  📤 อัปโหลด
-                  <input type="file" accept="image/*" style="display:none;" id="qrUploadInput" onchange="handleQrUpload(this)">
-                </label>
-              </div>
-              <small style="color:#6C757D;font-size:11px;">อัปโหลดรูป QR → เก็บใน Cloudinary (ไม่หายเมื่อ redeploy)</small>
+              <input type="text" class="form-input" id="settingQrCodeUrl" placeholder="/qr-payment.png หรือ https://...">
+              <small style="color:#6C757D;font-size:11px;">ใส่ URL ของรูป QR Code ที่อัปโหลดไว้</small>
             </div>
             <div id="qrPreview" style="margin-top:12px;text-align:center;">
               <img id="qrPreviewImg" src="" alt="QR Preview" style="max-width:200px;border-radius:12px;border:2px solid #E9ECEF;display:none;">
             </div>
+          </div>
+        </div>
+
+        <!-- Category Management -->
+        <div class="card">
+          <div class="card-header">
+            <span style="font-weight:700;font-size:16px;">📂 หมวดหมู่สินค้า</span>
+            <button class="btn btn-sm" onclick="addCategory()" style="background:#FF6B00;color:white;border:none;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+              + เพิ่มหมวดหมู่
+            </button>
+          </div>
+          <div style="padding:16px;">
+            <p style="font-size:13px;color:#6C757D;margin-bottom:16px;">เพิ่ม แก้ไข หรือลบหมวดหมู่สินค้า หมวดหมู่ที่มีสินค้าใช้อยู่จะไม่สามารถลบได้</p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ชื่อหมวดหมู่</th>
+                  <th>จำนวนสินค้า</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="categoriesTable"></tbody>
+            </table>
           </div>
         </div>
 
@@ -446,11 +466,12 @@
   </div>
 
   <script>
-    const API = `${window.location.protocol}//${window.location.hostname}/api`;
+    const API = `${window.location.origin}/api`;
     let token = localStorage.getItem('token');
     let products = [];
     let orders = [];
     let customers = [];
+    let categories = [];
     let currentOrderFilter = 'all';
     let currentProductCat = 'all';
     let availableCategories = [];
@@ -580,7 +601,7 @@
         }
       });
       counts['pending-items'] = pendingQtyCount;
-      document.getElementById('tabCountAll').textContent = counts.all;
+      document.getElementById('tabCountAll').textContent = counts.pending + counts.shipping;
       document.getElementById('tabCountPending').textContent = counts.pending;
       document.getElementById('tabCountShipping').textContent = counts.shipping;
       document.getElementById('tabCountCompleted').textContent = counts.completed;
@@ -683,17 +704,11 @@
       tbody.innerHTML = customers.map(c => `
         <tr>
           <td>
-            <div style="display:flex;align-items:center;gap:10px;">
-              ${c.avatar ? `<img src="${c.avatar}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--gray-200);">` : `<div style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">${c.name ? c.name.charAt(0) : '?'}</div>`}
-              <div>
-                <div style="font-weight:600;">${c.name}</div>
-                ${c.isAdmin ? '<span style="background:#FF6B00;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">ADMIN</span>' : ''}
-              </div>
-            </div>
+            <div style="font-weight:600;">${c.name}</div>
+            ${c.isAdmin ? '<span style="background:#FF6B00;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">ADMIN</span>' : ''}
           </td>
           <td>${c.email}</td>
           <td>${c.phone || '-'}</td>
-          <td><div style="font-size:12px;color:var(--gray-600);">${c.address || '<span style="color:var(--gray-400);">ยังไม่มีที่อยู่</span>'}</div></td>
           <td>${c.createdAt ? new Date(c.createdAt).toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="editCustomer(${c.id})">แก้ไข</button>
@@ -891,10 +906,26 @@
     }
 
     function renderOrdersTable() {
-      const filtered = currentOrderFilter === 'all' ? orders : orders.filter(o => o.status === currentOrderFilter);
+      const searchText = (document.getElementById('orderSearchInput')?.value || '').toLowerCase().trim();
+      let filtered = currentOrderFilter === 'all'
+        ? orders.filter(o => o.status === 'pending' || o.status === 'shipping')
+        : orders.filter(o => o.status === currentOrderFilter);
+
+      // Apply search
+      if (searchText) {
+        filtered = filtered.filter(o => {
+          const matchName = (o.userName || '').toLowerCase().includes(searchText);
+          const matchEmail = (o.userEmail || '').toLowerCase().includes(searchText);
+          const matchStatus = o.status.toLowerCase().includes(searchText);
+          const matchItems = (o.items || []).some(item => (item.name || '').toLowerCase().includes(searchText));
+          const matchOrderId = String(o.id).includes(searchText);
+          return matchName || matchEmail || matchStatus || matchItems || matchOrderId;
+        });
+      }
+
       const tbody = document.getElementById('ordersTable');
       if (filtered.length === 0) {
-        const emptyText = { all: 'ยังไม่มีออเดอร์', pending: 'ไม่มีออเดอร์รอดำเนินการ', shipping: 'ไม่มีออเดอร์ที่กำลังจัดส่ง', completed: 'ไม่มีออเดอร์ที่สำเร็จ', cancelled: 'ไม่มีออเดอร์ที่ยกเลิก' };
+        const emptyText = { all: 'ไม่มีออเดอร์ที่กำลันดำเนินการ', pending: 'ไม่มีออเดอร์รอดำเนินการ', shipping: 'ไม่มีออเดอร์ที่กำลังจัดส่ง', completed: 'ไม่มีออเดอร์ที่สำเร็จ', cancelled: 'ไม่มีออเดอร์ที่ยกเลิก' };
         tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#ADB5BD;padding:40px;">${emptyText[currentOrderFilter] || 'ไม่มีออเดอร์'}</td></tr>`;
         return;
       }
@@ -1022,7 +1053,9 @@
       }
     }
 
-    function openProductModal(product = null) {
+    async function openProductModal(product = null) {
+      // Load fresh categories for dropdown
+      await loadProductsForCategoryDropdown();
       document.getElementById('productId').value = product ? product.id : '';
       document.getElementById('productModalTitle').textContent = product ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่';
       document.getElementById('productName').value = product ? product.name : '';
@@ -1030,7 +1063,7 @@
       document.getElementById('productPrice').value = product ? product.price : '';
       document.getElementById('productOriginal').value = product ? (product.original || '') : '';
       document.getElementById('productUnit').value = product ? product.unit : '';
-      document.getElementById('productCategory').value = product ? product.category : 'อาหาร';
+      document.getElementById('productCategory').value = product ? product.category : (categories[0]?.name || 'อาหาร');
       document.getElementById('productStock').value = product ? product.stock : '';
       document.getElementById('productDesc').value = product ? product.desc : '';
       // Image field
@@ -1163,29 +1196,105 @@
         if (this.value) { img.src = this.value; img.style.display = 'block'; }
         else img.style.display = 'none';
       });
+      await loadCategories();
     }
 
-    async function handleQrUpload(input) {
-      if (!input.files || !input.files[0]) return;
-      const file = input.files[0];
-      const formData = new FormData();
-      formData.append('qr', file);
+    async function loadCategories() {
       try {
-        input.disabled = true;
-        input.parentElement.style.opacity = '0.6';
-        const res = await fetch(`${API}/upload/qr`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-        if (res.ok) {
-          const data = await res.json();
-          document.getElementById('settingQrCodeUrl').value = data.url;
-          const img = document.getElementById('qrPreviewImg');
-          img.src = data.url;
-          img.style.display = 'block';
-          showToast('อัปโหลด QR Code สำเร็จ! ✅');
-        } else {
-          showToast('อัปโหลดล้มเหลว');
+        const res = await fetch(`${API}/categories`);
+        categories = await res.json();
+        renderCategoriesTable();
+        await loadProductsForCategoryDropdown();
+      } catch (e) { console.error('loadCategories error:', e); }
+    }
+
+    async function loadProductsForCategoryDropdown() {
+      // Load categories into product form dropdown
+      try {
+        const res = await fetch(`${API}/categories`);
+        const cats = await res.json();
+        const sel = document.getElementById('productCategory');
+        if (sel) {
+          sel.innerHTML = cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
         }
-      } catch { showToast('เกิดข้อผิดพลาด'); }
-      finally { input.disabled = false; input.parentElement.style.opacity = '1'; }
+      } catch (e) {}
+    }
+
+    function renderCategoriesTable() {
+      const tbody = document.getElementById('categoriesTable');
+      if (!tbody) return;
+      if (categories.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#ADB5BD;padding:40px;">ยังไม่มีหมวดหมู่</td></tr>';
+        return;
+      }
+      // Count products per category
+      const catCounts = {};
+      products.forEach(p => {
+        if (p.category) {
+          catCounts[p.category] = (catCounts[p.category] || 0) + 1;
+        }
+      });
+      tbody.innerHTML = categories.map(c => `
+        <tr>
+          <td style="font-weight:600;">${c.name}</td>
+          <td style="color:#6C757D;">${catCounts[c.name] || 0} รายการ</td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="openEditCategory(${c.id}, '${c.name.replace(/'/g, "\\'")}')">แก้ไข</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id}, '${c.name.replace(/'/g, "\\'")}')">ลบ</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function addCategory() {
+      const name = prompt('ชื่อหมวดหมู่ใหม่:');
+      if (!name || !name.trim()) return;
+      try {
+        const res = await fetch(`${API}/categories`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ name: name.trim() })
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'เกิดข้อผิดพลาด'); return; }
+        showToast('เพิ่มหมวดหมู่แล้ว! ✅');
+        await loadCategories();
+      } catch (e) { showToast('เกิดข้อผิดพลาด'); }
+    }
+
+    function openEditCategory(id, currentName) {
+      const newName = prompt('แก้ไขชื่อหมวดหมู่:', currentName);
+      if (!newName || !newName.trim() || newName.trim() === currentName) return;
+      saveEditCategory(id, newName.trim());
+    }
+
+    async function saveEditCategory(id, name) {
+      try {
+        const res = await fetch(`${API}/categories/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'เกิดข้อผิดพลาด'); return; }
+        showToast('แก้ไขหมวดหมู่แล้ว! ✅');
+        await loadCategories();
+        await loadProductsForCategoryDropdown();
+      } catch (e) { showToast('เกิดข้อผิดพลาด'); }
+    }
+
+    async function deleteCategory(id, name) {
+      if (!confirm(`ลบหมวดหมู่ "${name}"?`)) return;
+      try {
+        const res = await fetch(`${API}/categories/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'เกิดข้อผิดพลาด'); return; }
+        showToast('ลบหมวดหมู่แล้ว! ✅');
+        await loadCategories();
+      } catch (e) { showToast('เกิดข้อผิดพลาด'); }
     }
 
     async function saveSettings() {

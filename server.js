@@ -23,7 +23,7 @@ cloudinary.config({
 });
 
 let db;
-let productsCol, usersCol, ordersCol, settingsCol, flashSaleCol;
+let productsCol, usersCol, ordersCol, settingsCol, flashSaleCol, categoriesCol;
 
 // ============ MongoDB Connect ============
 async function connectDB() {
@@ -39,6 +39,7 @@ async function connectDB() {
     ordersCol = db.collection('orders');
     settingsCol = db.collection('settings');
     flashSaleCol = db.collection('flashsale');
+    categoriesCol = db.collection('categories');
 
     // Ensure indexes
     await productsCol.createIndex({ id: 1 }, { unique: true });
@@ -101,12 +102,29 @@ async function seedDefaultData() {
       await flashSaleCol.insertMany(saleProducts.map(p => ({ productId: p.id, discount: p.discount || 0, endsAt: null })));
     }
   }
+
+  // Seed default categories
+  const catCount = await categoriesCol.countDocuments();
+  if (catCount === 0) {
+    const defaultCats = [
+      { name: 'อาหาร' }, { name: 'เครื่องดื่ม' }, { name: 'ขนม' }, { name: 'ผัก' },
+      { name: 'ผลไม้' }, { name: 'เนื้อสัตว์' }, { name: 'ของใช้' }, { name: 'เครื่องปรุง' },
+    ];
+    await categoriesCol.insertMany(defaultCats.map((c, i) => ({ id: i + 1, name: c.name, createdAt: new Date().toISOString() })));
+    console.log(`[DB] Inserted ${defaultCats.length} categories`);
+  }
 }
 
 // ============ Helper: Get next ID ============
 async function getNextId(collection) {
-  const maxDoc = await collection.findOne({}, { sort: { id: -1 } });
-  return maxDoc ? (maxDoc.id || 0) + 1 : 1;
+  // Atomic counter using findOneAndUpdate to prevent race conditions
+  const countersCol = db.collection('counters');
+  const result = await countersCol.findOneAndUpdate(
+    { _id: collection.collectionName },
+    { $inc: { seq: 1 } },
+    { upsert: true, returnDocument: 'after' }
+  );
+  return result.seq;
 }
 
 // ============ Line Notify ============
@@ -176,7 +194,7 @@ app.post('/api/auth/login', (req, res) => {
   usersCol.findOne({ email, password }).then(user => {
     if (!user) return res.status(401).json({ error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
     const token = Buffer.from(JSON.stringify({ id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin })).toString('base64');
-    res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin } });
+    res.json({ token, user: { id: user.id, email: user.email, name: user.name, phone: user.phone || '', avatar: user.avatar || '', isAdmin: user.isAdmin } });
   });
 });
 
@@ -193,10 +211,13 @@ app.post('/api/auth/register', async (req, res) => {
   await usersCol.insertOne(user);
   
   const token = Buffer.from(JSON.stringify({ id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin })).toString('base64');
-  res.json({ token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin } });
+  res.json({ token, user: { id: user.id, email: user.email, name: user.name, phone: user.phone || '', avatar: user.avatar || '', isAdmin: user.isAdmin } });
 });
 
-app.get('/api/auth/me', authMiddleware, (req, res) => res.json(req.user));
+app.get('/api/auth/me', authMiddleware, async (req, res) => {
+  const fresh = await usersCol.findOne({ id: req.user.id }, { projection: { password: 0 } });
+  res.json(fresh || req.user);
+});
 
 // ============ Products API ============
 app.get('/api/products', async (req, res) => {
@@ -246,7 +267,9 @@ app.delete('/api/products/:id', authMiddleware, async (req, res) => {
 // ============ Orders API ============
 app.get('/api/orders', authMiddleware, async (req, res) => {
   try {
-    const orders = await ordersCol.find({}).sort({ id: -1 }).toArray();
+    // Admins see all orders, regular users see only their own
+    const filter = req.user.isAdmin ? {} : { userId: req.user.id };
+    const orders = await ordersCol.find(filter).sort({ id: -1 }).toArray();
     res.json(orders);
   } catch { res.json([]); }
 });
@@ -289,7 +312,10 @@ app.post('/api/guest-order', async (req, res) => {
 
 // ============ Authenticated Order ============
 app.post('/api/orders', authMiddleware, async (req, res) => {
-  const { items, subtotal, feeAmount, total, paymentMethod, deliveryMethod, address } = req.body;
+  const { items, subtotal, feeAmount, total, paymentMethod, deliveryMethod, address, customerAddress } = req.body;
+  console.log('[DEBUG POST /orders] items:', JSON.stringify(items), '| total:', total);
+  const userProfile = await usersCol.findOne({ id: req.user.id });
+  const userPhone = userProfile ? (userProfile.phone || '') : '';
   if (!items || items.length === 0) return res.status(400).json({ error: 'ไม่มีสินค้าในคำสั่งซื้อ' });
 
   const id = await getNextId(ordersCol);
@@ -305,12 +331,11 @@ app.post('/api/orders', authMiddleware, async (req, res) => {
   }
 
   const order = {
-    id, userId: req.user.id, userName: req.user.name, userEmail: req.user.email,
+    id, userId: req.user.id, userName: req.user.name, userEmail: req.user.email, userPhone,
     items, subtotal: subtotal || total, feeAmount: feeAmount || 0, total,
     paymentMethod: paymentMethod || 'cod', deliveryMethod: deliveryMethod || 'pickup',
-    address: address || '', status: 'pending', createdAt: new Date().toISOString()
+    address: address || '', customerAddress: customerAddress || null, status: 'pending', createdAt: new Date().toISOString()
   };
-  await ordersCol.insertOne(order);
 
   const itemList = items.slice(0, 5).map(i => `• ${i.name} x${i.qty}`).join('\n');
   const more = items.length > 5 ? `\n...และอีก ${items.length - 5} รายการ` : '';
@@ -326,7 +351,9 @@ app.post('/api/orders', authMiddleware, async (req, res) => {
   ].join('\n');
 
   try { await sendLineNotify(message); } catch (e) { console.log('[Line] Notify failed:', e.message); }
-  console.log('[Order Created]', `Order #${id}`, req.user.name, `Total: ฿${total}`);
+
+  await ordersCol.insertOne(order);
+  console.log('[Order Created]', `Order #${id}`, req.user.name, `Total: ฿${total}`, `Items: ${items.length}`);
 
   res.json(order);
 });
@@ -422,18 +449,72 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
   res.json(updated);
 });
 
+// ============ Categories API ============
+app.get('/api/categories', async (req, res) => {
+  try {
+    const categories = await categoriesCol.find({}).sort({ name: 1 }).toArray();
+    res.json(categories);
+  } catch { res.json([]); }
+});
+
+app.post('/api/categories', authMiddleware, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
+  const { name } = req.body;
+  if (!name || !name.trim()) return res.status(400).json({ error: 'กรุณาระบุชื่อหมวดหมู่' });
+  const trimName = name.trim();
+  const existing = await categoriesCol.findOne({ name: trimName });
+  if (existing) return res.status(400).json({ error: 'มีหมวดหมู่นี้อยู่แล้ว' });
+  const count = await categoriesCol.countDocuments();
+  const category = { id: count + 1, name: trimName, createdAt: new Date().toISOString() };
+  await categoriesCol.insertOne(category);
+  res.json(category);
+});
+
+app.put('/api/categories/:id', authMiddleware, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
+  const { name } = req.body;
+  if (!name || !name.trim()) return res.status(400).json({ error: 'กรุณาระบุชื่อหมวดหมู่' });
+  const trimName = name.trim();
+  const existing = await categoriesCol.findOne({ name: trimName, id: { $ne: parseInt(req.params.id) } });
+  if (existing) return res.status(400).json({ error: 'มีหมวดหมู่นี้อยู่แล้ว' });
+  const oldCat = await categoriesCol.findOne({ id: parseInt(req.params.id) });
+  if (!oldCat) return res.status(404).json({ error: 'ไม่พบหมวดหมู่' });
+  await categoriesCol.updateOne({ id: parseInt(req.params.id) }, { $set: { name: trimName } });
+  // Also update all products that use this category by old name
+  await productsCol.updateMany({ category: oldCat.name }, { $set: { category: trimName } });
+  const updated = await categoriesCol.findOne({ id: parseInt(req.params.id) });
+  res.json(updated);
+});
+
+app.delete('/api/categories/:id', authMiddleware, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'ไม่มีสิทธิ์' });
+  const catId = parseInt(req.params.id);
+  const cat = await categoriesCol.findOne({ id: catId });
+  if (!cat) return res.status(404).json({ error: 'ไม่พบหมวดหมู่' });
+  // Check if any products use this category by name
+  const used = await productsCol.countDocuments({ category: cat.name });
+  if (used > 0) return res.status(400).json({ error: `มีสินค้าใช้หมวดหมู่นี้ ${used} รายการ กรุณาเปลี่ยนหมวดหมู่สินค้าก่อน` });
+  await categoriesCol.deleteOne({ id: catId });
+  res.json({ success: true });
+});
+
 app.get('/api/flash-sale', async (req, res) => {
   try {
-    // Get flash sale product IDs
-    const flashItems = await flashSaleCol.find({}).toArray();
-    if (!flashItems.length) {
-      // Fallback: products with discount
-      const products = await productsCol.find({ discount: { $gt: 0 } }).limit(8).toArray();
-      return res.json(products);
+    // Get products: flashSale field = true (admin-ticked) OR discount >= 20%
+    const [flashProducts, discountedProducts] = await Promise.all([
+      productsCol.find({ flashSale: true }).limit(8).toArray(),
+      productsCol.find({ discount: { $gte: 20 } }).limit(8).toArray(),
+    ]);
+    // Merge, avoiding duplicates by id
+    const seen = new Set();
+    const merged = [];
+    for (const p of flashProducts) {
+      if (!seen.has(p.id)) { seen.add(p.id); merged.push(p); }
     }
-    const productIds = flashItems.map(f => f.productId);
-    const products = await productsCol.find({ id: { $in: productIds } }).toArray();
-    res.json(products);
+    for (const p of discountedProducts) {
+      if (!seen.has(p.id)) { seen.add(p.id); merged.push(p); }
+    }
+    res.json(merged.slice(0, 12));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

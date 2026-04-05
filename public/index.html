@@ -114,11 +114,6 @@
     .flash-sale { background: linear-gradient(135deg, #FF3D00 0%, #FF6B00 100%); border-radius: var(--radius-lg); padding: 16px; color: white; margin: 0 16px 16px; }
     .flash-sale-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .flash-sale-title { font-size: 16px; font-weight: 700; }
-    /* Products page */
-    .page-products .header { padding: 12px 16px 0; }
-    .page-products .content { padding-top: 8px; }
-    .page-products .search-bar { margin: 8px 0; }
-    .page-products .quick-tags { padding: 0; }
     .timer-box { background: white; color: var(--danger); font-size: 13px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
     .timer-sep { font-weight: 700; }
 
@@ -321,8 +316,16 @@
         <div class="promo-subtitle" id="promoSubtitle">รายการแรก ส่งฟรีไม่มีขั้นต่ำ</div>
       </div>
       <div class="section" style="margin-bottom:8px;">
-        <div class="quick-tags" id="quickTags">
-          <button class="quick-tag active" onclick="filterCategory(this, 'all')">ทั้งหมด</button>
+        <div style="padding:8px 16px 0;">
+          <div id="categoryDropdown" style="position:relative;">
+            <button id="categoryDropdownBtn" onclick="toggleCategoryDropdown()" style="width:100%;background:white;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);padding:10px 14px;font-size:14px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+              <span id="categoryDropdownLabel">🏪 ทั้งหมด</span>
+              <span class="material-icons-round" style="font-size:20px;color:var(--gray-400);transition:transform 0.2s;" id="categoryDropdownArrow">expand_more</span>
+            </button>
+            <div id="categoryDropdownMenu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border-radius:var(--radius-md);box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:50;max-height:300px;overflow-y:auto;">
+              <div id="categoryDropdownList"></div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="flash-sale">
@@ -332,9 +335,12 @@
             <span class="timer-box" id="timerH">08</span><span class="timer-sep">:</span><span class="timer-box" id="timerM">45</span><span class="timer-sep">:</span><span class="timer-box" id="timerS">30</span>
           </div>
         </div>
-        <div class="products-grid" id="flashSaleGrid"></div>
+        <div id="flashSaleScroll" style="display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:8px;scrollbar-width:none;">
+          <style>#flashSaleScroll::-webkit-scrollbar{display:none}</style>
+          <div id="flashSaleGrid" style="display:flex;gap:12px;flex-shrink:0;"></div>
+        </div>
       </div>
-      <div class="section">
+      <div class="section" id="categoriesSection" style="display:none;">
         <div class="section-header"><div class="section-title">หมวดหมู่สินค้า</div></div>
         <div class="categories-wrap" id="categoriesGrid"></div>
       </div>
@@ -347,33 +353,30 @@
     </div>
   </div>
 
-  <!-- Orders Page -->
-  <!-- Products Page -->
-  <div class="page" id="page-products">
+  <!-- ChackShop Page -->
+  <div class="page" id="page-chackshop">
     <header class="header">
       <div class="header-top">
-        <div class="logo">สินค้าทั้งหมด</div>
+        <div class="logo">Chack<span>Shop</span></div>
         <div class="header-actions">
           <button class="icon-btn" onclick="openCart()">
             <span class="material-icons-round">shopping_cart</span>
-            <span class="badge" id="cartBadge2" style="display:none">0</span>
+            <span class="badge" id="cartBadgeChack" style="display:none">0</span>
           </button>
         </div>
       </div>
-      <div class="search-bar">
-        <span class="material-icons-round">search</span>
-        <input type="text" placeholder="ค้นหาสินค้า..." id="productsSearchInput" oninput="filterProductsPage(this.value)">
-      </div>
-      <div class="quick-tags" id="productsQuickTags" style="padding:8px 16px;overflow-x:auto;white-space:nowrap;">
-      </div>
     </header>
     <div class="content">
-      <div class="products-grid" id="productsPageGrid" style="padding-top:8px;">
-        <div class="loading"><div class="spinner"></div><div class="loading-text">กำลังโหลดสินค้า...</div></div>
+      <div class="section">
+        <div class="section-header"><div class="section-title">🛍️ สินค้า ChackShop</div></div>
+        <div class="products-grid" id="chackshopGrid">
+          <div class="loading"><div class="spinner"></div><div class="loading-text">กำลังโหลด...</div></div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Orders Page -->
   <div class="page" id="page-orders">
     <header class="header">
       <div class="header-top">
@@ -427,9 +430,9 @@
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <button class="nav-item active" onclick="showPage('home', this)"><span class="material-icons-round">home</span><span>หน้าแรก</span></button>
-    <button class="nav-item" onclick="showPage('products', this)"><span class="material-icons-round">storefront</span><span>สินค้า</span></button>
+    <button class="nav-item" onclick="showPage('chackshop', this)"><span class="material-icons-round">storefront</span><span>ChackShop</span></button>
     <button class="nav-item" onclick="if(!isLoggedIn()){openAuthModal('login');return;} showPage('orders', this)"><span class="material-icons-round">receipt_long</span><span>ออเดอร์</span></button>
-    <button class="nav-item" onclick="openCart()"><span class="material-icons-round">shopping_cart</span><span>ตะกร้า</span></button>
+    <button class="nav-item" onclick="openCart()"><span class="material-icons-round" style="position:relative">shopping_cart<span class="badge" id="cartBadge2" style="display:none;position:absolute;top:-4px;right:-6px;min-width:16px;height:16px;font-size:10px;">0</span></span><span>ตะกร้า</span></button>
     <button class="nav-item" onclick="showPage('profile', this)"><span class="material-icons-round">person</span><span>โปรไฟล์</span></button>
   </nav>
 
@@ -589,21 +592,19 @@
     <div class="modal-content">
       <div class="modal-handle"></div>
       <div class="modal-title">✏️ แก้ไขโปรไฟล์</div>
-      <div style="text-align:center;margin-bottom:16px;">
+      <div class="form-group" style="text-align:center;">
         <div style="position:relative;display:inline-block;">
-          <div id="editAvatarPreview" style="width:72px;height:72px;border-radius:50%;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:var(--gray-500);margin:0 auto;overflow:hidden;">
-            <span id="editAvatarInitial">T</span>
-          </div>
-          <label style="position:absolute;bottom:0;right:0;background:var(--primary);color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+          <div id="editAvatarPreview" style="width:80px;height:80px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:var(--secondary);margin:0 auto;border:3px solid rgba(255,255,255,0.5);overflow:hidden;">T</div>
+          <label for="editAvatarInput" style="position:absolute;bottom:0;right:0;background:var(--primary);color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
             <span class="material-icons-round" style="font-size:16px;">camera_alt</span>
-            <input type="file" accept="image/*" style="display:none;" id="editAvatarInput" onchange="handleAvatarPreview(this)">
           </label>
+          <input type="file" id="editAvatarInput" accept="image/*" style="display:none;" onchange="previewAvatar(this)">
         </div>
-        <div style="font-size:12px;color:var(--gray-500);margin-top:6px;">แตะไอคอนกล้องเพื่อเปลี่ยนรูป</div>
       </div>
       <div class="form-group"><label class="form-label">ชื่อ</label><input type="text" class="form-input" id="editProfileName" placeholder="ชื่อของคุณ"></div>
       <div class="form-group"><label class="form-label">อีเมล</label><input type="email" class="form-input" id="editProfileEmail" placeholder="ton@email.com"></div>
-      <div class="form-group"><label class="form-label">เปลี่ยนรหัสผ่าน (ไม่บังคับ)</label><input type="password" class="form-input" id="editProfilePassword" placeholder="รหัสผ่านใหม่"></div>
+      <div class="form-group"><label class="form-label">เบอร์โทรศัพท์</label><input type="tel" class="form-input" id="editProfilePhone" placeholder="081-234-5678"></div>
+      <div class="form-group"><label class="form-label">รหัสผ่านใหม่ (ไม่กรอก = ไม่เปลี่ยน)</label><input type="password" class="form-input" id="editProfilePassword" placeholder="••••••"></div>
       <button class="save-btn" onclick="saveProfile()">💾 บันทึก</button>
       <button class="cancel-btn" onclick="closeEditProfileModal()">ยกเลิก</button>
     </div>
@@ -647,9 +648,9 @@
   </div>
 
   <script>
-    const API = `${window.location.protocol}//${window.location.hostname}/api`;
+    const API = `${window.location.origin}/api`;
     let products = [];
-    let cart = [];
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
     let user = null;
     let token = localStorage.getItem('token');
     let authMode = 'login';
@@ -659,11 +660,26 @@
     let modalProduct = null;
     let modalQty = 1;
 
+    // ============ Cart Persistence ============
+    function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); updateCartBadge(); }
+
     // ============ Init ============
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      const dropdown = document.getElementById('categoryDropdown');
+      if (dropdown && !dropdown.contains(e.target)) {
+        const menu = document.getElementById('categoryDropdownMenu');
+        if (menu) menu.style.display = 'none';
+        const arrow = document.getElementById('categoryDropdownArrow');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      }
+    });
+
     async function init() {
       await loadPromo();
       await loadProducts();
       if (token) await checkAuth();
+      updateCartBadge();
       startTimer();
     }
 
@@ -705,10 +721,24 @@
     // ============ Render ============
     function renderCategories() {
       const cats = [...new Set(products.map(p => p.category))];
-      const quickTags = document.getElementById('quickTags');
-      quickTags.innerHTML = `<button class="quick-tag active" onclick="filterCategory(this, 'all')">ทั้งหมด</button>` +
-        cats.map(c => `<button class="quick-tag" onclick="filterCategory(this, '${c}')">${c}</button>`).join('');
-      
+      const minimartCount = products.filter(p => p.category === 'ร้าน Minimart').length;
+      const list = document.getElementById('categoryDropdownList');
+      list.innerHTML = `
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;border-bottom:1px solid #eee;font-size:14px;" onclick="event.stopPropagation()">
+          <input type="checkbox" id="chkAllCats" onchange="toggleAllCategories(this.checked)" ${selectedCategories.length === 0 ? 'checked' : ''} style="accent-color:var(--primary);width:18px;height:18px;">
+          <span style="font-weight:600;">🏪 ทั้งหมด (${products.length})</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-size:14px;" onclick="event.stopPropagation()">
+          <input type="checkbox" class="cat-chk" value="ร้าน Minimart" onchange="applyCategoryFilter()" ${selectedCategories.includes('ร้าน Minimart') ? 'checked' : ''} style="accent-color:var(--primary);width:18px;height:18px;">
+          <span>🏪 ร้าน Minimart (${minimartCount})</span>
+        </label>
+        ${cats.filter(c => c !== 'ร้าน Minimart').map(c => {
+          const count = products.filter(p => p.category === c).length;
+          return `<label style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-size:14px;" onclick="event.stopPropagation()"><input type="checkbox" class="cat-chk" value="${c}" onchange="applyCategoryFilter()" ${selectedCategories.includes(c) ? 'checked' : ''} style="accent-color:var(--primary);width:18px;height:18px;"><span>${c} (${count})</span></label>`;
+        }).join('')}
+      `;
+      updateDropdownLabel();
+
       const grid = document.getElementById('categoriesGrid');
 
       function getEmojiAndStyle(cat) {
@@ -724,6 +754,7 @@
         if (c.includes('ของใช้') || c.includes('เครื่องใช้') || c.includes('อุปกรณ์') || c.includes('พลาสติก') || c.includes('ภาชนะ') || c.includes('ครัว')) return { emoji: '🏠', bg: 'linear-gradient(135deg,#E8EAF6,#C5CAE9)', tc: '#283593' };
         if (c.includes('อาหารแห้ง') || c.includes('สะดวก') || c.includes('บะหมี่') || c.includes('มาม่า') || c.includes('ราเมน') || c.includes('ข้าว')) return { emoji: '🍜', bg: 'linear-gradient(135deg,#FFF3E0,#FFE0B2)', tc: '#E65100' };
         if (c.includes('ของว่าง') || c.includes('นักเก็ต') || c.includes('เฟรนช์ฟราย') || c.includes('ถั่ว') || c.includes('ลูกชุบ')) return { emoji: '🍿', bg: 'linear-gradient(135deg,#FFFDE7,#FFF9C4)', tc: '#F9A825' };
+        if (c.includes('minimart')) return { emoji: '🏪', bg: 'linear-gradient(135deg,#E8F5E9,#B2EBF2)', tc: '#00695C' };
         if (c.includes('ธัญ') || c.includes('แป้ง') || c.includes('งา') || c.includes('มะพร้าว')) return { emoji: '🌾', bg: 'linear-gradient(135deg,#FFF8E1,#FFECB3)', tc: '#E65100' };
         return { emoji: '📦', bg: 'linear-gradient(135deg,#F5F5F7,#EEEEEE)', tc: '#757575' };
       }
@@ -733,6 +764,49 @@
         const count = products.filter(p => p.category === cat).length;
         return `<div class="category-card" onclick="selectCat(this,'${cat.replace(/'/g,"\\'")}')"><div class="category-icon" style="background:${bg}">${emoji}</div><div class="category-name" style="color:${tc}">${cat}</div><span class="category-count">${count} ชิ้น</span></div>`;
       }).join('');
+    }
+
+    let selectedCategories = [];
+
+    function toggleCategoryDropdown() {
+      const menu = document.getElementById('categoryDropdownMenu');
+      const arrow = document.getElementById('categoryDropdownArrow');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+      arrow.style.transform = menu.style.display === 'block' ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    function toggleAllCategories(checked) {
+      if (checked) {
+        selectedCategories = [];
+        document.querySelectorAll('.cat-chk').forEach(c => c.checked = false);
+      }
+      applyCategoryFilter();
+    }
+
+    function applyCategoryFilter() {
+      selectedCategories = Array.from(document.querySelectorAll('.cat-chk:checked')).map(c => c.value);
+      document.getElementById('chkAllCats').checked = selectedCategories.length === 0;
+      document.getElementById('categoryDropdownMenu').style.display = 'none';
+      document.getElementById('categoryDropdownArrow').style.transform = 'rotate(0deg)';
+      updateDropdownLabel();
+      const grid = document.getElementById('productsGrid');
+      let filtered = selectedCategories.length === 0 ? products : products.filter(p => selectedCategories.includes(p.category));
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-500);">ไม่พบสินค้าในหมวดที่เลือก</div>';
+      } else {
+        grid.innerHTML = filtered.map(p => createProductCard(p)).join('');
+      }
+    }
+
+    function updateDropdownLabel() {
+      const label = document.getElementById('categoryDropdownLabel');
+      if (selectedCategories.length === 0) {
+        label.textContent = '🏪 ทั้งหมด (' + products.length + ')';
+      } else if (selectedCategories.length === 1) {
+        label.textContent = '📂 ' + selectedCategories[0];
+      } else {
+        label.textContent = '📂 ' + selectedCategories.length + ' หมวด';
+      }
     }
 
     function selectCat(el, cat) {
@@ -752,6 +826,7 @@
     }
 
     async function renderFlashSale() {
+      const scroll = document.getElementById('flashSaleScroll');
       const grid = document.getElementById('flashSaleGrid');
       try {
         const res = await fetch(`${API}/flash-sale`);
@@ -760,10 +835,31 @@
           document.querySelector('.flash-sale').style.display = 'none';
           return;
         }
-        grid.innerHTML = sale.slice(0, 8).map(p => createProductCard(p, true)).join('');
+        const items = sale.slice(0, 8);
+        grid.innerHTML = items.map(p => createFlashCard(p)).join('');
       } catch {
         grid.innerHTML = '<p style="color:white;text-align:center;padding:20px;">ไม่สามารถโหลด Flash Sale</p>';
       }
+    }
+
+    function createFlashCard(p) {
+      const { bg, tc } = getGradient(p.category);
+      const fallback = `<span style="font-size:40px;width:100%;height:100px;display:flex;align-items:center;justify-content:center;">${p.emoji || '📦'}</span>`;
+      const imgTag = p.image
+        ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;padding:8px;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">${fallback.replace('display:flex', 'display:none')}`
+        : fallback;
+      return `
+        <div class="product-card" style="min-width:140px;max-width:140px;scroll-snap-align:start;flex-shrink:0;" onclick="openProductModal(${p.id})">
+          ${p.discount > 0 ? `<div class="product-badge flash" style="font-size:10px;">-${p.discount}%</div>` : ''}
+          <div style="background:${bg};height:100px;display:flex;align-items:center;justify-content:center;">${imgTag}</div>
+          <div class="product-info" style="padding:8px;">
+            <div class="product-name" style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+            <div style="font-size:13px;font-weight:700;color:#FF3D00;">฿${p.price}</div>
+            ${(p.original || 0) > p.price ? `<div style="font-size:10px;color:#999;text-decoration:line-through;">฿${p.original}</div>` : ''}
+            <button class="add-btn" style="width:28px;height:28px;margin-top:4px;" onclick="event.stopPropagation();quickAdd(${p.id})"><span class="material-icons-round" style="font-size:16px;">add</span></button>
+          </div>
+        </div>
+      `;
     }
 
     function createProductCard(p, isFlash = false) {
@@ -794,6 +890,18 @@
       return gradients[category] || "#F5F5F7";
     }
 
+    // ============ ChackShop Page ============
+    function renderChackshopProducts() {
+      const grid = document.getElementById('chackshopGrid');
+      const chackshopProducts = products.filter(p => p.category === 'ChackShop');
+      if (chackshopProducts.length === 0) {
+        grid.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--gray-500);"><span class="material-icons-round" style="font-size:64px;color:var(--gray-300);">inventory_2</span><p style="margin-top:12px;">ยังไม่มีสินค้าในหมวด ChackShop</p></div>';
+        return;
+      }
+      grid.innerHTML = chackshopProducts.map(p => createProductCard(p)).join('');
+      updateCartBadge();
+    }
+
     // ============ Filter ============
     function filterCategory(btn, category) {
       document.querySelectorAll('.quick-tag').forEach(t => t.classList.remove('active'));
@@ -806,36 +914,6 @@
       const tags = document.querySelectorAll('.quick-tag');
       tags.forEach(t => { if (t.textContent.includes(cat) || t.textContent === 'ทั้งหมด') t.classList.add('active'); });
       renderProducts(cat);
-    }
-
-    // ============ Products Page ============
-    let productsPageCat = 'all';
-    function renderProductsPage() {
-      const cats = [...new Set(products.map(p => p.category))];
-      const quickTags = document.getElementById('productsQuickTags');
-      quickTags.innerHTML = `<button class="quick-tag ${productsPageCat === 'all' ? 'active' : ''}" onclick="filterProductsPageByCat(this, 'all')">ทั้งหมด</button>` +
-        cats.map(c => `<button class="quick-tag ${productsPageCat === c ? 'active' : ''}" onclick="filterProductsPageByCat(this, '${c.replace(/'/g,"\\'")}')">${c}</button>`).join('');
-      filterProductsPage(document.getElementById('productsSearchInput') ? document.getElementById('productsSearchInput').value : '');
-    }
-    function filterProductsPageByCat(btn, cat) {
-      productsPageCat = cat;
-      document.querySelectorAll('#productsQuickTags .quick-tag').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      filterProductsPage(document.getElementById('productsSearchInput') ? document.getElementById('productsSearchInput').value : '');
-    }
-    function filterProductsPage(query) {
-      const grid = document.getElementById('productsPageGrid');
-      let filtered = productsPageCat === 'all' ? products : products.filter(p => p.category === productsPageCat);
-      if (query) {
-        const q = query.toLowerCase();
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || (p.unit && p.unit.toLowerCase().includes(q)));
-      }
-      if (filtered.length === 0) {
-        grid.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--gray-400);"><span class="material-icons-round" style="font-size:56px;">search_off</span><p style="margin-top:12px;font-size:16px;font-weight:600;">ไม่พบสินค้าที่ค้นหา</p></div>';
-        return;
-      }
-      grid.innerHTML = filtered.map(p => createProductCard(p)).join('');
-      updateCartBadge();
     }
 
     function handleSearch(query) {
@@ -855,15 +933,20 @@
       const product = products.find(p => p.id === id);
       const existing = cart.find(item => item.productId === id);
       if (existing) { existing.qty += 1; } else { cart.push({ productId: id, ...product, qty: 1 }); }
-      updateCartBadge();
+      saveCart();
       showToast(`เพิ่ม ${product.name} ลงตะกร้าแล้ว!`);
     }
 
     function updateCartBadge() {
-      const badge = document.getElementById('cartBadge');
       const total = cart.reduce((sum, item) => sum + item.qty, 0);
-      badge.style.display = total > 0 ? 'flex' : 'none';
-      badge.textContent = total > 99 ? '99+' : total;
+      const display = total > 0 ? 'flex' : 'none';
+      const text = total > 99 ? '99+' : total;
+      const badge = document.getElementById('cartBadge');
+      if (badge) { badge.style.display = display; badge.textContent = text; }
+      const badge2 = document.getElementById('cartBadge2');
+      if (badge2) { badge2.style.display = display; badge2.textContent = text; }
+      const badgeChack = document.getElementById('cartBadgeChack');
+      if (badgeChack) { badgeChack.style.display = display; badgeChack.textContent = text; }
     }
 
     function openCart() {
@@ -932,7 +1015,7 @@
     function removeFromCart(idx) {
       const item = cart[idx];
       cart.splice(idx, 1);
-      updateCartBadge();
+      saveCart();
       renderCart();
       showToast(`ลบ ${item.name} ออกแล้ว`);
     }
@@ -940,7 +1023,7 @@
     function changeCartQty(idx, delta) {
       cart[idx].qty += delta;
       if (cart[idx].qty <= 0) { cart.splice(idx, 1); }
-      updateCartBadge();
+      saveCart();
       renderCart();
     }
 
@@ -982,7 +1065,7 @@
       if (!modalProduct) return;
       const existing = cart.find(item => item.productId === modalProduct.id);
       if (existing) { existing.qty += modalQty; } else { cart.push({ productId: modalProduct.id, ...modalProduct, qty: modalQty }); }
-      updateCartBadge();
+      saveCart();
       closeProductModal();
       showToast(`เพิ่ม ${modalQty} ชิ้น ลงตะกร้าแล้ว!`);
     }
@@ -1096,13 +1179,23 @@
 
       const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
       const { total, feeAmount } = recalcTotal(subtotal);
-      const items = cart.map(item => ({ productId: item.productId, name: item.name, price: item.price, qty: item.qty, emoji: item.emoji }));
+      const items = cart.map(item => ({ productId: item.productId, name: item.name, price: item.price, qty: item.qty, emoji: item.emoji, image: item.image || '' }));
+      console.log('[DEBUG confirmPayment] cart:', JSON.stringify(cart), '=> items:', JSON.stringify(items));
+
+      // Get full address object from localStorage
+      const customerAddress = JSON.parse(localStorage.getItem('customerAddress') || '{}');
 
       try {
         const res = await fetch(`${API}/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ items, subtotal, feeAmount, total, paymentMethod: selectedPayment, deliveryMethod: selectedDelivery, address: address || '' })
+          body: JSON.stringify({
+            items, subtotal, feeAmount, total,
+            paymentMethod: selectedPayment,
+            deliveryMethod: selectedDelivery,
+            address: address || '',
+            customerAddress: Object.keys(customerAddress).length > 0 ? customerAddress : undefined
+          })
         });
         const order = await res.json();
 
@@ -1112,7 +1205,7 @@
         document.getElementById('successModal').classList.add('active');
 
         cart = [];
-        updateCartBadge();
+        saveCart();
       } catch (e) {
         showToast('เกิดข้อผิดพลาด กรุณาลองใหม่');
       }
@@ -1214,14 +1307,16 @@
       if (user) {
         loginBtn.style.display = 'none';
         userAvatar.style.display = 'flex';
+        // Show avatar image if available, otherwise show initial
         if (user.avatar) {
-          userAvatar.innerHTML = `<img src="${user.avatar}" style="width:36px;height:36px;object-fit:cover;border-radius:50%;">`;
+          userAvatar.innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${user.name.charAt(0)}'">`;
         } else {
           userAvatar.textContent = user.name.charAt(0);
         }
+        // Profile page avatar
         const profileAvatar = document.getElementById('profileAvatar');
         if (user.avatar) {
-          profileAvatar.innerHTML = `<img src="${user.avatar}" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,0.5);">`;
+          profileAvatar.innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${user.name.charAt(0)}'">`;
         } else {
           profileAvatar.textContent = user.name.charAt(0);
         }
@@ -1257,23 +1352,26 @@
       try {
         const res = await fetch(`${API}/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
         const orders = await res.json();
-        if (orders.length === 0) {
-          content.innerHTML = '<div style="text-align:center;padding:60px 20px;"><span class="material-icons-round" style="font-size:64px;color:var(--gray-300)">receipt_long</span><p style="margin-top:12px;color:var(--gray-500)">ยังไม่มีรายการสั่งซื้อ</p></div>';
+        // Filter: show only pending and shipping
+        const activeOrders = orders.filter(o => o.status === 'pending' || o.status === 'shipping');
+        if (activeOrders.length === 0) {
+          content.innerHTML = '<div style="text-align:center;padding:60px 20px;"><span class="material-icons-round" style="font-size:64px;color:var(--gray-300)">receipt_long</span><p style="margin-top:12px;color:var(--gray-500)">ไม่มีออเดอร์ที่กำลังดำเนินการ</p></div>';
           return;
         }
-        content.innerHTML = orders.map(o => `
+        content.innerHTML = activeOrders.map(o => `
           <div class="order-card">
             <div class="order-header">
               <div><div class="order-id">Order #${o.id}</div><div class="order-date">${new Date(o.createdAt).toLocaleDateString('th-TH')}</div></div>
               <div class="order-status ${o.status}">${getStatusText(o.status)}</div>
             </div>
-            <div class="order-items">${o.items.map(item => `
+            <div class="order-items">${(o.items || []).map(item => `
               <div class="order-item">
                 <span class="order-item-emoji">${item.image ? `<img src="${item.image}" style="width:32px;height:32px;object-fit:contain;">` : (item.emoji || '📦')}</span>
                 <div class="order-item-info"><div class="order-item-name">${item.name}</div><div class="order-item-qty">x${item.qty}</div></div>
-                <div class="order-item-price">฿${item.price * item.qty}</div>
+                <div class="order-item-price">฿${(item.price || 0) * (item.qty || 1)}</div>
               </div>
             `).join('')}</div>
+            ${o.address || o.customerAddress ? `<div style="font-size:12px;color:var(--gray-500);padding:8px 12px;background:#f9f9f9;border-radius:8px;margin-bottom:8px;">📍 ${typeof o.customerAddress === 'object' ? [o.customerAddress.house, o.customerAddress.soi, o.customerAddress.street, o.customerAddress.subdistrict, o.customerAddress.district, o.customerAddress.province, o.customerAddress.zip].filter(Boolean).join(' ') : (o.address || '')}</div>` : ''}
             <div class="order-footer"><span>รวม</span><span class="order-total">฿${o.total}</span></div>
           </div>
         `).join('');
@@ -1295,7 +1393,8 @@
       if (btn) btn.classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (pageId === 'orders') loadOrders();
-      if (pageId === 'products') renderProductsPage();
+      if (pageId === 'profile') loadOrderStats();
+      if (pageId === 'chackshop') renderChackshopProducts();
     }
 
     // ============ Utilities ============
@@ -1323,24 +1422,23 @@
       if (!isLoggedIn()) { openAuthModal('login'); return; }
       document.getElementById('editProfileName').value = (user && user.name) ? user.name : '';
       document.getElementById('editProfileEmail').value = (user && user.email) ? user.email : '';
+      document.getElementById('editProfilePhone').value = (user && user.phone) ? user.phone : '';
       document.getElementById('editProfilePassword').value = '';
       // Avatar preview
       const preview = document.getElementById('editAvatarPreview');
-      const initial = document.getElementById('editAvatarInitial');
       if (user && user.avatar) {
-        preview.innerHTML = `<img src="${user.avatar}" style="width:72px;height:72px;object-fit:cover;border-radius:50%;">`;
+        preview.innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;">`;
       } else {
-        preview.innerHTML = `<span id="editAvatarInitial">${(user && user.name) ? user.name.charAt(0) : 'T'}</span>`;
+        preview.innerHTML = (user && user.name) ? user.name.charAt(0).toUpperCase() : 'T';
       }
       document.getElementById('editProfileModal').style.display = 'flex';
     }
     function closeEditProfileModal() { document.getElementById('editProfileModal').style.display = 'none'; }
-    function handleAvatarPreview(input) {
+    function previewAvatar(input) {
       if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          const preview = document.getElementById('editAvatarPreview');
-          preview.innerHTML = `<img src="${e.target.result}" style="width:72px;height:72px;object-fit:cover;border-radius:50%;">`;
+          document.getElementById('editAvatarPreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
         };
         reader.readAsDataURL(input.files[0]);
       }
@@ -1348,37 +1446,54 @@
     async function saveProfile() {
       const name = document.getElementById('editProfileName').value.trim();
       const email = document.getElementById('editProfileEmail').value.trim();
-      const password = document.getElementById('editProfilePassword').value.trim();
+      const phone = document.getElementById('editProfilePhone').value.trim();
+      const password = document.getElementById('editProfilePassword').value;
       if (!name) { showToast('กรุณากรอกชื่อ'); return; }
       if (!email) { showToast('กรุณากรอกอีเมล'); return; }
 
-      const payload = { name, email };
-      if (password) payload.password = password;
+      const body = { name, email };
+      if (phone) body.phone = phone;
+      if (password) body.password = password;
 
-      // Upload avatar if selected
+      // Handle avatar upload via server endpoint
       const avatarInput = document.getElementById('editAvatarInput');
       if (avatarInput.files && avatarInput.files[0]) {
-        const formData = new FormData();
-        formData.append('avatar', avatarInput.files[0]);
+        showToast('กำลังอัปโหลดรูป...');
         try {
-          const upRes = await fetch(`${API}/upload/avatar`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-          if (upRes.ok) {
-            const upData = await upRes.json();
-            payload.avatar = upData.url;
+          const formData = new FormData();
+          formData.append('avatar', avatarInput.files[0]);
+          const uploadRes = await fetch(`${API}/upload/avatar`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          });
+          const uploadData = await uploadRes.json();
+          if (uploadData.url) {
+            body.avatar = uploadData.url;
+          } else {
+            showToast('อัปโหลดรูปล้มเหลว: ' + (uploadData.error || ''));
           }
-        } catch {}
+        } catch(e) { showToast('อัปโหลดรูปล้มเหลว'); console.error(e); }
       }
 
-      // Update local
-      user = { ...(user || {}), ...payload };
-      if (payload.avatar) user.avatar = payload.avatar;
-      delete user.password;
+      // Update user in localStorage immediately for UI
+      user = { ...(user || {}), name, email, phone, avatar: body.avatar || user?.avatar };
       localStorage.setItem('user', JSON.stringify(user));
 
-      // Update server
+      // Save profile to server
       try {
-        await fetch(`${API}/users/${user.id}/profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
-      } catch {}
+        const saveRes = await fetch(`${API}/users/${user.id}/profile`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(body)
+        });
+        const savedData = await saveRes.json();
+        if (savedData && savedData.avatar) {
+          user.avatar = savedData.avatar;
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+      } catch (e) { console.error('Save profile failed:', e); }
+
       updateUserUI();
       closeEditProfileModal();
       showToast('บันทึกโปรไฟล์แล้ว! 🎉');
@@ -1403,18 +1518,29 @@
       const province = document.getElementById('addrProvince').value.trim();
       if (!house) { showToast('กรุณากรอกที่อยู่'); return; }
       if (!province) { showToast('กรุณากรอกจังหวัด'); return; }
-      const addr = { house, soi: document.getElementById('addrSoi').value.trim(), street: document.getElementById('addrStreet').value.trim(), subdistrict: document.getElementById('addrSubdistrict').value.trim(), district: document.getElementById('addrDistrict').value.trim(), province, zip: document.getElementById('addrZip').value.trim(), phone: document.getElementById('addrPhone').value.trim() };
-      const fullAddress = [addr.house, addr.soi, addr.street, addr.subdistrict, addr.district, addr.province, addr.zip].filter(Boolean).join(' ');
+      const addr = {
+        house, soi: document.getElementById('addrSoi').value.trim(),
+        street: document.getElementById('addrStreet').value.trim(),
+        subdistrict: document.getElementById('addrSubdistrict').value.trim(),
+        district: document.getElementById('addrDistrict').value.trim(),
+        province, zip: document.getElementById('addrZip').value.trim(),
+        phone: document.getElementById('addrPhone').value.trim()
+      };
+      const parts = [addr.house, addr.soi, addr.street, addr.subdistrict, addr.district, addr.province, addr.zip].filter(Boolean);
       localStorage.setItem('customerAddress', JSON.stringify(addr));
-      localStorage.setItem('deliveryAddress', fullAddress);
+      localStorage.setItem('deliveryAddress', parts.join(' '));
       const payAddr = document.getElementById('deliveryAddress');
-      if (payAddr) payAddr.value = fullAddress;
-      // Save to server DB
-      if (token && user) {
-        try {
-          await fetch(`${API}/users/${user.id}/profile`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ address: fullAddress }) });
-        } catch {}
-      }
+      if (payAddr) payAddr.value = parts.join(' ');
+
+      // Save to backend so admin can see
+      try {
+        await fetch(`${API}/users/${user.id}/profile`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ address: addr, phone: addr.phone })
+        });
+      } catch (e) { console.error('Save address to backend failed:', e); }
+
       closeAddressModal();
       showToast('บันทึกที่อยู่แล้ว! 📍');
     }
